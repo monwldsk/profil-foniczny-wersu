@@ -195,6 +195,81 @@
       margin-bottom: 3px;
     }
 
+    .pilot-study {
+      max-width: 950px;
+      margin: 34px auto 42px;
+      padding: clamp(22px, 3.5vw, 32px);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f4f9ff, #fff 55%);
+      box-shadow: 0 8px 28px rgba(29, 58, 108, .045);
+      color: #445b75;
+    }
+
+    .pilot-study__head {
+      margin-bottom: 18px;
+    }
+
+    .pilot-study__badge {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      color: var(--blue-dark);
+      background: #dcecff;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .pilot-study h2 {
+      margin: 0;
+      text-align: left;
+      font-size: clamp(24px, 3vw, 30px);
+      line-height: 1.15;
+    }
+
+    .pilot-study__content {
+      font-size: 15px;
+      line-height: 1.65;
+      text-align: justify;
+    }
+
+    .pilot-study__content p {
+      margin: 0 0 16px;
+    }
+
+    .pilot-study__content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .pilot-study__figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin: 22px 0;
+    }
+
+    .pilot-study__figure {
+      margin: 0;
+      padding: 14px;
+      border: 1px solid #e2ebf6;
+      border-radius: 13px;
+      background: #fff;
+      box-shadow: 0 4px 14px rgba(29, 58, 108, .04);
+    }
+
+    .pilot-study__figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 8px;
+    }
+
     .drama-input-header {
       text-align: center;
       margin-bottom: 26px;
@@ -745,6 +820,10 @@
       .results-header {
         flex-direction: column;
       }
+
+      .pilot-study__figures {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media(max-width:600px) {
@@ -897,6 +976,56 @@
           <img src="assets/trojkat_samogloskowy.png" alt="model trójkąta samogłoskowego w języku polskim">
         </div>
       </div>
+
+      <section class="pilot-study" aria-labelledby="pilot-study-heading">
+        <div class="pilot-study__head">
+          <div class="pilot-study__badge">Badanie pilotażowe</div>
+          <h2 id="pilot-study-heading">Badanie pilotażowe: profil foniczny klauzuli</h2>
+        </div>
+
+        <div class="pilot-study__content">
+          <p>
+            Wstępne wyniki analizy pozycji zgłosek liczonych od końca pokazują wyraźną odmienność ostatniej sylaby
+            klauzuli względem reszty wersu. Pozycje od −6 do −2 tworzą zazwyczaj stosunkowo stabilny układ, natomiast
+            pomiędzy pozycjami −2 i −1 pojawia się wyraźny uskok. Dotyczy on zarówno miejsca artykulacji, jak i
+            wysokości samogłosek: ostatnia sylaba – w kontraście do przedostatniej – częściej wykazuje profil
+            przesunięty
+            ku samogłoskom przednim i wysokim (przykład na podstawie <i>Fantazego</i> J. Słowackiego):
+          </p>
+
+          <div class="pilot-study__figures">
+            <figure class="pilot-study__figure">
+              <img src="assets/wykres_miejsce.png" alt="Wykres: klauzula – miejsce artykulacji">
+            </figure>
+            <figure class="pilot-study__figure">
+              <img src="assets/wykres_wysokosc.png" alt="Wykres: klauzula – wysokość samogłoski">
+            </figure>
+          </div>
+
+          <p>
+            Na obecnym etapie prac nad narzędziem błędem byłoby interpretować tę obserwację wyłącznie jako konsekwencję
+            zajmowanej pozycji w wersie. W polszczyźnie przeważa akcent paroksytoniczny (w wybranym do analizy tekście
+            także), toteż w typowej klauzuli
+            przedostatnia sylaba wersu (-2) jest zarazem ostatnią sylabą akcentowaną (po niej następuje sylaba w pozycji
+            posttonicznej(-1)).
+          </p>
+
+          <p>
+            Interpretacja kładąca nacisk na zjawisko akcentowania wydaje się trafniejsza, dlatego że profil nie zmienia
+            się stopniowo wraz ze zbliżaniem się do końca wersu. Przeciwnie – wcześniejsze pozycje klauzuli pozostają
+            względnie stabilne, a największe uskok pojawia się dopiero na pozycjach -2/-1. Zaobserwowany efekt może mieć
+            zatem związek z lokalną organizacją prozodyczną zakończenia wersu.
+          </p>
+
+          <p>
+            Dalszy rozwój narzędzia powinien objąć model, w którym pozycje sylab będą liczone nie tylko od końca wersu,
+            lecz także względem ostatniej sylaby akcentowanej. Pozwoliłoby to zweryfikować, czy charakterystyczny profil
+            należy łączyć z ostatnią sylabą wersu, czy raczej przesuwa się on wraz z lokalizacją akcentu.Szczególnie
+            istotne
+            byłoby porównanie różnych typów zakończeń (paroksytoniczne i oksytoniczne).
+          </p>
+        </div>
+      </section>
 
       <div class="drama-input-header">
         <h2>Wprowadź tekst</h2>
