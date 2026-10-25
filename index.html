@@ -392,7 +392,7 @@
 
     .options-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
       margin: 22px 0 0;
     }
@@ -965,10 +965,6 @@
             analizie.</small>
         </div>
         <div class="option-card">
-          <label><input id="skipNasals" type="checkbox" />Pomijaj samogłoski nosowe ą, ę</label>
-          <small>Gdy opcja jest wyłączona, <b>ą</b> klasyfikowane jest jak <b>o</b>, a <b>ę</b> jak <b>e</b>.</small>
-        </div>
-        <div class="option-card">
           <label for="aggregationMode">Sposób liczenia profilu średniego</label>
           <select id="aggregationMode">
             <option value="verse" selected>średnia z wersów (każdy wers = 1)</option>
@@ -1141,8 +1137,8 @@
         o: { normalized: "o", fb: 1, height: 0, fbClass: "back", heightClass: "mid" },
         u: { normalized: "u", fb: 1, height: 1, fbClass: "back", heightClass: "high" },
         ó: { normalized: "u", fb: 1, height: 1, fbClass: "back", heightClass: "high" },
-        ą: { normalized: "o", fb: 1, height: 0, fbClass: "back", heightClass: "mid", nasal: true },
-        ę: { normalized: "e", fb: -1, height: 0, fbClass: "front", heightClass: "mid", nasal: true }
+        ą: { normalized: "ą", fb: 1, height: 0, fbClass: "back", heightClass: "mid" },
+        ę: { normalized: "ę", fb: -1, height: 0, fbClass: "front", heightClass: "mid" }
       };
 
       const SEGMENTS = [
@@ -1163,7 +1159,6 @@
         librarySearch: document.getElementById("librarySearch"),
         libraryNoResults: document.getElementById("libraryNoResults"),
         skipI: document.getElementById("skipNonSyllabicI"),
-        skipNasals: document.getElementById("skipNasals"),
         aggregation: document.getElementById("aggregationMode"),
         status: document.getElementById("status"),
         results: document.getElementById("results"),
@@ -1196,7 +1191,6 @@
         DOM.fileInput.addEventListener("change", e => loadTxtFile(e.target.files?.[0]));
         DOM.librarySearch.addEventListener("input", filterLibrary);
         DOM.skipI.addEventListener("change", reanalyzeIfPossible);
-        DOM.skipNasals.addEventListener("change", reanalyzeIfPossible);
         DOM.aggregation.addEventListener("change", () => {
           if (state.analyzed.length) renderAggregateResults();
         });
@@ -1301,7 +1295,7 @@
         if (!text.trim()) { setStatus("Wprowadź tekst do analizy.", true); return; }
 
         const reconstructed = reconstructVerses(text);
-        const options = { skipI: DOM.skipI.checked, skipNasals: DOM.skipNasals.checked };
+        const options = { skipI: DOM.skipI.checked };
         const analyzed = reconstructed.verses
           .map((line, index) => analyzeVerse(line.text, index + 1, options, line.shared))
           .filter(Boolean);
@@ -1408,13 +1402,12 @@
 
         for (const segment of SEGMENTS) {
           const [start, end] = ranges[segment.key];
-          segments[segment.key] = analyzeSyllableSegment(text, syllables, start, end, options);
+          segments[segment.key] = analyzeSyllableSegment(text, syllables, start, end);
         }
 
         const positionObservations = syllables.length > 1
           ? syllables.map((syllable, index) => {
             const feature = syllable.feature;
-            if (feature.nasal && options.skipNasals) return null;
             return {
               syllableIndex: index + 1,
               position: index / (syllables.length - 1),
@@ -1432,8 +1425,7 @@
       }
 
       // W tej analizie "sylaba" jest reprezentowana przez swoje samogłoskowe jądro.
-      // Ą i Ę zawsze pozostają jądrami dla potrzeb podziału wersu, nawet jeśli użytkownik
-      // wybierze pomijanie samogłosek nosowych w samych statystykach artykulacyjnych.
+      // Ą i Ę są pełnoprawnymi jądrami sylab i są analizowane zgodnie z własnymi cechami artykulacyjnymi.
       function getSyllableUnits(text, options) {
         const units = [];
         const lowerText = text.toLocaleLowerCase("pl");
@@ -1486,7 +1478,7 @@
         };
       }
 
-      function analyzeSyllableSegment(text, syllables, start, end, options) {
+      function analyzeSyllableSegment(text, syllables, start, end) {
         const counts = emptyCounts();
         const vowels = [];
         const selected = [];
@@ -1498,8 +1490,6 @@
 
           const raw = syllable.raw;
           const feature = syllable.feature;
-          if (feature.nasal && options.skipNasals) continue;
-
           vowels.push({ raw, ...feature });
           counts.total++;
           counts[feature.fbClass]++;
