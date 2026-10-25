@@ -1,0 +1,1698 @@
+<!doctype html>
+<html lang="pl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script data-goatcounter="https://monikaisyd.goatcounter.com/count" async="" src="//gc.zgo.at/count.js"></script>
+
+  <title>Profil foniczny wersu – analiza pozycyjna samogłosek</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" href="assets/favicon.png" />
+  <style>
+    :root {
+      --color-primary: #002e52;
+      --color-accent: #0073ce;
+      --color-bg: #eeeeee;
+      --color-surface: #ffffff;
+      --color-border: #dddddd;
+      --color-muted: #f4f4f4;
+      --color-tip: #0073ce;
+      --shadow-card: 0 2px 14px rgba(0, 0, 0, .1);
+      --radius-card: 24px;
+      --radius-control: 7px;
+      --max-width: 1200px;
+      --bg: #f7f9fc;
+      --surface: rgba(255, 255, 255, .94);
+      --text: #0b1d37;
+      --muted: #5b6678;
+      --blue: #2f69d9;
+      --blue-dark: #163f8f;
+      --blue-soft: #edf4ff;
+      --line: #dce7f8;
+      --shadow: 0 18px 50px rgba(29, 58, 108, .08);
+      --radius: 22px;
+      --front: #2f69d9;
+      --central: #7a889d;
+      --back: #0b72a8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 22px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(47, 105, 217, .09), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(47, 105, 217, .07), transparent 26%),
+        linear-gradient(180deg, #fbfdff, var(--bg));
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      padding: 9px 20px;
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-control);
+      color: #fff;
+      background: var(--color-primary);
+      cursor: pointer;
+      font-weight: 700;
+      transition: .18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: var(--color-accent);
+      background: var(--color-accent);
+    }
+
+    button.secondary {
+      border-color: var(--color-accent);
+      background: var(--color-accent);
+    }
+
+    button.ghost {
+      color: var(--blue-dark);
+      border: 1px solid #bfd2e7;
+      background: #f4f8fd;
+    }
+
+    button.ghost:hover {
+      color: var(--blue-dark);
+      background: #eaf2fb;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: var(--color-primary);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+      text-align: center;
+    }
+
+    h1 span {
+      color: var(--blue);
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      text-align: center;
+    }
+
+    .page {
+      width: min(100%, var(--max-width));
+      margin: 0 auto;
+    }
+
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::after {
+      content: "";
+      width: 110px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+    }
+
+    .lead {
+      max-width: 840px;
+      margin: 22px auto 0;
+      /* color: var(--muted); */
+      font-size: 16px;
+      text-align: justify;
+    }
+
+    .card-shell {
+      margin-bottom: 24px;
+      padding: clamp(20px, 4vw, 38px);
+      border: 1px solid rgba(27, 66, 127, .10);
+      border-radius: var(--radius-card);
+      background: rgba(255, 255, 255, .96);
+      box-shadow: var(--shadow-card);
+    }
+
+    .info-strip {
+      margin: 0 auto 28px;
+      padding: 16px 18px;
+      max-width: 950px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f5f9ff;
+      color: #53657a;
+      text-align: center;
+    }
+
+    .vowel-map {
+      width: 100%;
+      max-width: 100%;
+      margin: 26px auto;
+    }
+
+    .vowel-map img {
+      display: block;
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .vowel-map strong {
+      display: block;
+      color: var(--blue-dark);
+      margin-bottom: 3px;
+    }
+
+    .drama-input-header {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .drama-input-header p {
+      color: #62748a;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .drama-methods-overview {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 900px;
+      margin: auto;
+      padding-bottom: 30px;
+    }
+
+    .drama-method-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 19px;
+      border: 1px solid #d7e5f4;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(245, 250, 255, .95), #fff);
+      box-shadow: 0 5px 16px rgba(29, 74, 119, .035);
+      color: inherit;
+      text-decoration: none;
+      transition: .2s ease;
+    }
+
+    .drama-method-card:hover {
+      transform: translateY(-3px);
+      border-color: #bdd4ec;
+      box-shadow: 0 10px 24px rgba(29, 74, 119, .09);
+    }
+
+    .drama-method-card h3 {
+      margin: 1px 0 5px;
+      font-size: 17px;
+    }
+
+    .drama-method-card p {
+      margin: 0;
+      color: #62748a;
+      font-size: 14px;
+    }
+
+    .drama-method-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #edf5ff;
+      border: 1px solid #d7e7fa;
+      color: #1269c9;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .drama-option {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 190px;
+      padding: 14px;
+      border: 1px solid #cbdced;
+      border-radius: 9px;
+      resize: vertical;
+      background: #fff;
+      color: #10233f;
+      line-height: 1.5;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .drama-or-divider {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      max-width: 600px;
+      margin: 26px auto;
+    }
+
+    .drama-or-divider span {
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    .drama-or-divider strong {
+      color: #92a0ad;
+      font-size: 11px;
+      letter-spacing: .18em;
+    }
+
+    .file-drop-zone {
+      margin: 10px auto;
+      max-width: 900px;
+      padding: 22px;
+      border: 2px dashed var(--color-accent);
+      border-radius: 10px;
+      text-align: center;
+      color: var(--color-primary);
+      background: #f7fbff;
+      transition: .2s ease;
+    }
+
+    .file-drop-zone.drag-over {
+      background: #e6f3ff;
+      transform: scale(1.005);
+    }
+
+    .library-section {
+      margin: 22px 0 0;
+      padding: 20px;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: #fafafa;
+    }
+
+    .library-search {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-control);
+    }
+
+    .library-no-results {
+      display: none;
+      color: #666;
+    }
+
+    .library-grid {
+      overflow-x: auto;
+      display: flex;
+      gap: 16px;
+      padding: 12px;
+    }
+
+    .library-card {
+      min-width: 188px;
+      max-width: 188px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .10);
+    }
+
+    .library-card img {
+      width: 100%;
+      padding: 0 38px;
+      object-fit: contain;
+    }
+
+    .library-author {
+      font-size: .9em;
+      color: #666;
+    }
+
+    .library-title {
+      font-weight: 700;
+      color: var(--color-primary);
+      min-height: 42px;
+    }
+
+    .library-card button {
+      margin-top: auto;
+      width: 100%;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 22px 0 0;
+    }
+
+    .option-card {
+      padding: 14px;
+      border: 1px solid #e5edf8;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #fff, #fbfdff);
+    }
+
+    .option-card label {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      font-weight: 700;
+      color: #17385f;
+    }
+
+    .option-card input[type=checkbox] {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+      accent-color: #0b72d9;
+      flex: 0 0 auto;
+    }
+
+    .option-card small {
+      display: block;
+      margin-top: 7px;
+      color: #65758b;
+      line-height: 1.45;
+    }
+
+    .option-card select {
+      width: 100%;
+      margin-top: 7px;
+      padding: 8px 9px;
+      border: 1px solid #cbdced;
+      border-radius: 7px;
+      background: #fff;
+    }
+
+    .status {
+      min-height: 22px;
+      margin: 14px 0 0;
+      text-align: center;
+      color: #65758b;
+    }
+
+    .status.error {
+      color: #b33128;
+    }
+
+    .results {
+      display: none;
+    }
+
+    .results.visible {
+      display: block;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .results-header p {
+      margin: 0;
+      color: #65758b;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .summary-card {
+      padding: 18px;
+      border: 1px solid #dce7f8;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 4px 14px rgba(29, 58, 108, .04);
+    }
+
+    .summary-card h3 {
+      margin: 0 0 4px;
+      font-size: 18px;
+    }
+
+    .summary-card .score {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin: 13px 0;
+    }
+
+    .score-box {
+      padding: 10px;
+      border-radius: 10px;
+      background: #edf4ff;
+    }
+
+    .score-box span {
+      display: block;
+      color: #65758b;
+      font-size: 11px;
+    }
+
+    .score-box strong {
+      color: #2f69d9;
+      font-size: 20px;
+    }
+
+    .mini-counts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      font-size: 11px;
+      color: #5b6678;
+    }
+
+    .mini-counts div {
+      padding: 7px 5px;
+      border: 1px solid #edf2f8;
+      border-radius: 8px;
+      text-align: center;
+      background: #fbfdff;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .chart-panel {
+      min-width: 0;
+      padding: 18px;
+      border: 1px solid #dce7f8;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .chart-panel h3 {
+      margin: 0 0 4px;
+    }
+
+    .chart-panel p {
+      margin: 0 0 10px;
+      color: #65758b;
+      font-size: 12px;
+    }
+
+    .chart-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 10px;
+    }
+
+    .chart-scale-note {
+      color: #65758b;
+      font-size: 11px;
+    }
+
+    .scale-toggle {
+      padding: 6px 10px;
+      border-width: 1px;
+      border-color: #bfd2e7;
+      color: #163f8f;
+      background: #f4f8fd;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .scale-toggle:hover {
+      border-color: #a9c7e5;
+      color: #163f8f;
+      background: #eaf2fb;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 340px;
+    }
+
+    .table-panel {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid #dce7f8;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .table-panel h3 {
+      margin: 0 0 5px;
+    }
+
+    .table-note {
+      margin: 0 0 12px;
+      color: #65758b;
+      font-size: 12px;
+    }
+
+    .table-scroll {
+      max-height: 520px;
+      overflow: auto;
+      border: 1px solid #e5edf8;
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      padding: 7px 8px;
+      border-bottom: 1px solid #edf2f8;
+      border-right: 1px solid #edf2f8;
+      text-align: left;
+      vertical-align: top;
+      font-size: 11px;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f4f7fb;
+      color: #17385f;
+    }
+
+    tr:hover td {
+      background: #fbfdff;
+    }
+
+    .verse-text {
+      min-width: 260px;
+      max-width: 420px;
+      white-space: pre-wrap;
+    }
+
+    .segment-cell {
+      min-width: 220px;
+    }
+
+    .segment-fragment {
+      display: block;
+      margin-bottom: 5px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 12px;
+      color: #23384f;
+    }
+
+    .segment-counts {
+      color: #65758b;
+      line-height: 1.45;
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #edf4ff;
+      color: #2f69d9;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .method-note {
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid #dce7f8;
+      border-radius: 10px;
+      background: #f5f9ff;
+      color: #65758b;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .warning {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid #f0ddad;
+      border-radius: 10px;
+      background: #fffaf0;
+      color: #71551c;
+      font-size: 12px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media(max-width:900px) {
+
+      .drama-methods-overview,
+      .options-grid,
+      .summary-grid,
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-header {
+        flex-direction: column;
+      }
+    }
+
+    @media(max-width:600px) {
+      body {
+        padding: 8px;
+      }
+
+      .hero {
+        padding-inline: 12px;
+      }
+
+      .card-shell {
+        padding: 18px 12px;
+      }
+
+      .button-row {
+        flex-direction: column;
+      }
+
+      .button-row button {
+        width: 100%;
+      }
+
+      .vowel-map {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    a {
+      color: var(--blue);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 26px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      text-decoration: underline;
+    }
+
+    .baner-main {
+      width: 100%;
+      max-width: 100%;
+      margin: auto;
+    }
+
+    .baner-main img {
+      display: block;
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .beta-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+
+      width: fit-content;
+      margin: 8px auto 28px;
+      padding: 7px 15px;
+
+      border: 1px solid #b9d7ff;
+      border-radius: 999px;
+
+      background: #f3f8ff;
+      color: #1769c7;
+
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 600;
+
+      box-shadow: 0 3px 12px rgba(47, 105, 217, 0.06);
+    }
+
+    .beta-status__label {
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .beta-status__dot {
+      color: #76a9e8;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+
+
+    <section class="card-shell">
+      <a class="back-link" href="https://monwldsk.github.io/cyfrowa-analiza-literatury/">← Powrót do listy
+        narzędzi</a>
+      <div class="baner-main"><img src="assets/baner.png" alt="baner"></div>
+
+      <div class="beta-status" role="status" aria-label="Wersja beta. Strona w budowie">
+        <span class="beta-status__label">BETA</span>
+        <span class="beta-status__dot">·</span>
+        <span>Strona w budowie</span>
+      </div>
+      <h2>Po co powstaje ta strona?</h2>
+
+      <div class="lead">
+        <p>
+          Celem niniejszego projektu jest ustalenie, na podstawie obszernego korpusu literatury polskiej, czy da się
+          zaobserwować jakąś zależność między <strong>pozycją sylaby w wersie</strong> a <strong>profilem artykulacyjnym
+            samogłoski stanowiącej jej ośrodek</strong>. Badanie obejmuje w szczególności dwie podstawowe opozycje
+          artykulacyjne: położenie samogłoski na osi <strong>przednia-środkowa-tylna</strong> oraz na osi
+          <strong>niska-średnia-wysoka</strong>.
+        </p>
+
+        <p>
+          Analiza ma zweryfikować, czy dystrybucja określonych typów samogłosek w obrębie wersu jest przypadkowa, czy
+          może wykazuje pewne tendencje związane z pozycją: <strong>nagłosową, środkową i
+            wygłosową</strong>.
+        </p>
+
+        <p>
+          W dalszej kolejności planuję rozszerzenie analizy o dwa zagadnienia:</p>
+        <ol>
+          <li>
+            Jeżeli zależności pozycyjne zostaną potwierdzone w badaniu ilościowym, chcę zweryfikować, czy ich charakter
+            ma jakikolwiek związek z formatem wiersza, a więc czy inny profil wykazują wersy 8-zgłoskowe, 11-zgłoskowe,
+            13-zgłoskowe
+            itd.</li>
+          <li>
+            Chcę ponadto zbadać, czy istnieje zależność między pozycją akcentową sylaby a profilem artykulacyjnym jej
+            samogłoski, a
+            więc czy można zaobserwować pewne preferencje, jeśli chodzi o rozmieszczenie samogłosek w sylabach
+            akcentowanych i nieakcentowanych.</li>
+        </ol>
+        <p>
+          Narzędzie dzieli każdy zrekonstruowany wers na nagłos, część środkową i wygłos według liczby sylab,
+          a następnie porównuje rozkład samogłosek pod względem położenia języka
+          (przednie – środkowe – tylne) i wysokości (wysokie – średnie – niskie).
+        </p>
+      </div>
+      <div class="info-strip">
+        <strong>Polski diagram samogłoskowy</strong>
+        <div class="vowel-map">
+          <img src="assets/trojkat_samogloskowy.png" alt="model trójkąta samogłoskowego w języku polskim">
+        </div>
+      </div>
+
+      <div class="drama-input-header">
+        <h2>Wprowadź tekst</h2>
+        <p>Dostępne są 3 sposoby wprowadzenia tekstu:</p>
+      </div>
+      <div class="drama-methods-overview">
+        <a href="#drama-paste" class="drama-method-card">
+          <span class="drama-method-number">01</span>
+          <div>
+            <h3>Wklej tekst</h3>
+            <p>Wprowadź treść bezpośrednio w polu tekstowym.</p>
+          </div>
+        </a>
+        <a href="#drama-file" class="drama-method-card">
+          <span class="drama-method-number">02</span>
+          <div>
+            <h3>Wczytaj plik .txt</h3>
+            <p>Przeciągnij plik lub wybierz go z dysku.</p>
+          </div>
+        </a>
+        <a href="#drama-library" class="drama-method-card">
+          <span class="drama-method-number">03</span>
+          <div>
+            <h3>Wybierz z biblioteki</h3>
+            <p>Wczytaj tekst z katalogu assets/biblioteka.</p>
+          </div>
+        </a>
+      </div>
+
+      <section id="drama-paste">
+        <div class="drama-option"><span class="drama-method-number">01</span>
+          <h3>Wklej tekst</h3>
+        </div>
+        <textarea id="inputText" placeholder="Wklej dowolny tekst wierszowany..."></textarea>
+      </section>
+
+      <div class="drama-or-divider"><span></span><strong>LUB</strong><span></span></div>
+      <div class="drama-option"><span class="drama-method-number">02</span>
+        <h3>Wczytaj plik .txt</h3>
+      </div>
+      <section id="drama-file" class="file-drop-zone" aria-label="Wczytywanie pliku tekstowego">
+        <strong>Wybierz plik .txt albo przeciągnij go tutaj</strong><br /><br />
+        <input type="file" id="txtFileInput" accept=".txt,text/plain" />
+      </section>
+
+      <div class="drama-or-divider"><span></span><strong>LUB</strong><span></span></div>
+      <div class="drama-option"><span class="drama-method-number">03</span>
+        <h3>Wybierz z biblioteki</h3>
+      </div>
+      <section id="drama-library" class="library-section" aria-label="Biblioteka tekstów">
+        <h2>Moja biblioteka</h2>
+
+        <input type="search" id="librarySearch" class="library-search"
+          placeholder="Wyszukaj po autorze lub tytule..." />
+        <p id="libraryNoResults" class="library-no-results">Nie znaleziono pasujących tekstów.</p>
+        <p style="font-size:.85em;color:#666">⇄ Przewijaj w poziomie, aby zobaczyć więcej pozycji</p>
+        <div id="libraryGrid" class="library-grid"></div>
+      </section>
+
+      <div class="options-grid">
+        <div class="option-card">
+          <label><input id="skipNonSyllabicI" type="checkbox" checked />Pomijaj [i] w funkcji
+            niezgłoskotwórczej</label>
+          <small>Pomija „i” w sekwencjach: <code>ie, ia, iu, ię, ią, io, ii, iy, ió</code>. Druga samogłoska pozostaje
+            w
+            analizie.</small>
+        </div>
+        <div class="option-card">
+          <label><input id="skipNasals" type="checkbox" />Pomijaj samogłoski nosowe ą, ę</label>
+          <small>Gdy opcja jest wyłączona, <b>ą</b> klasyfikowane jest jak <b>o</b>, a <b>ę</b> jak <b>e</b>.</small>
+        </div>
+        <div class="option-card">
+          <label for="aggregationMode">Sposób liczenia profilu średniego</label>
+          <select id="aggregationMode">
+            <option value="verse" selected>średnia z wersów (każdy wers = 1)</option>
+            <option value="vowel">ważona samogłoskami (każda samogłoska = 1)</option>
+          </select>
+          <small>Pierwszy wariant ogranicza wpływ dłuższych wersów; drugi opisuje rozkład wszystkich samogłosek
+            korpusu.</small>
+        </div>
+      </div>
+
+      <div class="button-row" style="margin-top:20px">
+        <button id="analyzeButton" type="button">Analizuj</button>
+        <button id="clearButton" type="button" class="secondary">Wyczyść</button>
+        <button id="csvButton" type="button" class="ghost" disabled>Eksportuj CSV</button>
+      </div>
+      <div id="status" class="status" role="status"></div>
+    </section>
+
+    <section id="results" class="card-shell results" aria-live="polite">
+      <div class="results-header">
+        <div>
+          <h2>Profil pozycyjny samogłosek</h2>
+          <p id="resultsMeta"></p>
+        </div>
+        <span class="tag">NAGŁOS · ŚRODEK · WYGŁOS</span>
+      </div>
+
+      <div id="summaryGrid" class="summary-grid"></div>
+
+      <div class="charts-grid">
+        <section class="chart-panel">
+          <h3>Oś przednia – środkowa – tylna</h3>
+          <p>−1 = przewaga samogłosek przednich, 0 = środkowych / równowaga, +1 = tylnych.</p>
+          <div class="chart-toolbar">
+            <span id="frontBackScaleNote" class="chart-scale-note">Zbliżenie skali wokół 0</span>
+            <button id="frontBackScaleToggle" class="scale-toggle" type="button">Pełna skala −1…+1</button>
+          </div>
+          <div class="chart-wrap"><canvas id="frontBackChart"></canvas></div>
+        </section>
+        <section class="chart-panel">
+          <h3>Oś niska – średnia – wysoka</h3>
+          <p>−1 = przewaga samogłosek niskich, 0 = średnich / równowaga, +1 = wysokich.</p>
+          <div class="chart-toolbar">
+            <span id="heightScaleNote" class="chart-scale-note">Zbliżenie skali wokół 0</span>
+            <button id="heightScaleToggle" class="scale-toggle" type="button">Pełna skala −1…+1</button>
+          </div>
+          <div class="chart-wrap"><canvas id="heightChart"></canvas></div>
+        </section>
+      </div>
+
+      <div class="charts-grid">
+        <section class="chart-panel">
+          <h3>Rozkład miejsca artykulacji</h3>
+          <p>Udział procentowy samogłosek przednich, środkowych i tylnych w każdym odcinku.</p>
+          <div class="chart-wrap"><canvas id="frontBackDistributionChart"></canvas></div>
+        </section>
+        <section class="chart-panel">
+          <h3>Rozkład wysokości</h3>
+          <p>Udział procentowy samogłosek wysokich, średnich i niskich w każdym odcinku.</p>
+          <div class="chart-wrap"><canvas id="heightDistributionChart"></canvas></div>
+        </section>
+      </div>
+
+      <section class="table-panel">
+        <h3>Kontrola podziału – wers po wersie</h3>
+        <p class="table-note">Podział jest wykonywany według liczby sylab. Jeżeli matematyczna granica 1/3 lub 2/3
+          wypada wewnątrz sylaby, cała ta sylaba trafia do części środkowej. Liczby w komórkach: <b>P/Ś/T</b> =
+          przednie/środkowe/tylne, <b>W/Śr/N</b> = wysokie/średnie/niskie.</p>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Wers po rekonstrukcji</th>
+                <th>Nagłos</th>
+                <th>Środek</th>
+                <th>Wygłos</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="method-note">
+        <strong>Reguła segmentacji:</strong> długość wersu jest wyznaczana przez liczbę wykrytych sylab (czyli
+        samogłoskowych ośrodków sylab).
+        Granice części przypadają w 1/3 i 2/3 długości sylabicznej. Jeżeli granica wypada dokładnie pomiędzy sylabami,
+        części są dzielone w tym miejscu.
+        Jeżeli natomiast granica matematycznie wypada w środku sylaby, cała sylaba zostanie przypisana do części
+        środkowej. Segmenty nie nakładają się.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const APP_CONFIG = {
+        syllableReplacementRegex: /ie|ia|iu|ię|ią|io|ii|iy|ió/g,
+        nonSyllabicISequences: new Set(["ie", "ia", "iu", "ię", "ią", "io", "ii", "iy", "ió"]),
+        sharedLineIndent: 20,
+        library: [
+          ["Juliusz Słowacki", "Samuel Zborowski", "assets/biblioteka/slowacki-samuel-zborowski.txt"],
+          ["Cyprian Norwid", "Pierścień Wielkiej Damy", "assets/biblioteka/norwid-pierscien-wielkiej-damy.txt"],
+          ["Juliusz Słowacki", "Balladyna", "assets/biblioteka/slowacki-balladyna.txt"],
+          ["Juliusz Słowacki", "Ksiądz Marek", "assets/biblioteka/slowacki-ksiadz-marek.txt"],
+          ["Juliusz Słowacki", "Fantazy", "assets/biblioteka/slowacki-fantazy.txt"],
+          ["Juliusz Słowacki", "Kordian", "assets/biblioteka/slowacki-kordian.txt"],
+          ["Juliusz Słowacki", "Książę niezłomny", "assets/biblioteka/slowacki-ksiaze-niezlomny.txt"],
+          ["Juliusz Słowacki", "Lilla Weneda", "assets/biblioteka/slowacki-lilla-weneda.txt"],
+          ["Juliusz Słowacki", "Maria Stuart", "assets/biblioteka/slowacki-maria-stuart.txt"],
+          ["Juliusz Słowacki", "Mazepa", "assets/biblioteka/slowacki-mazepa.txt"],
+          ["Juliusz Słowacki", "Mindowe", "assets/biblioteka/slowacki-mindowe.txt"],
+          ["Juliusz Słowacki", "Sen srebrny Salomei", "assets/biblioteka/slowacki-sen-srebrny-salomei.txt"],
+          ["Adam Mickiewicz", "II cz. Dziadów", "assets/biblioteka/mickiewicz-dziady-ii.txt"],
+          ["Adam Mickiewicz", "IV cz. Dziadów", "assets/biblioteka/mickiewicz-dziady-iv.txt"],
+          ["Adam Mickiewicz", "III cz. Dziadów", "assets/biblioteka/mickiewicz-dziady-iii.txt"],
+          ["Adam Mickiewicz", "I cz. Dziadów", "assets/biblioteka/mickiewicz-widowisko-czesc-i.txt"]
+        ]
+      };
+
+      // Wartości osi: front/back: -1 przednia, 0 środkowa, +1 tylna.
+      // height: +1 wysoka, 0 średnia, -1 niska.
+      const VOWEL_FEATURES = {
+        a: { normalized: "a", fb: 0, height: -1, fbClass: "central", heightClass: "low" },
+        e: { normalized: "e", fb: -1, height: 0, fbClass: "front", heightClass: "mid" },
+        i: { normalized: "i", fb: -1, height: 1, fbClass: "front", heightClass: "high" },
+        y: { normalized: "y", fb: -1, height: 1, fbClass: "front", heightClass: "high" },
+        o: { normalized: "o", fb: 1, height: 0, fbClass: "back", heightClass: "mid" },
+        u: { normalized: "u", fb: 1, height: 1, fbClass: "back", heightClass: "high" },
+        ó: { normalized: "u", fb: 1, height: 1, fbClass: "back", heightClass: "high" },
+        ą: { normalized: "o", fb: 1, height: 0, fbClass: "back", heightClass: "mid", nasal: true },
+        ę: { normalized: "e", fb: -1, height: 0, fbClass: "front", heightClass: "mid", nasal: true }
+      };
+
+      const SEGMENTS = [
+        { key: "onset", label: "Nagłos" },
+        { key: "middle", label: "Środek" },
+        { key: "coda", label: "Wygłos" }
+      ];
+
+      const DOM = {
+        input: document.getElementById("inputText"),
+        analyze: document.getElementById("analyzeButton"),
+        clear: document.getElementById("clearButton"),
+        csv: document.getElementById("csvButton"),
+        fileInput: document.getElementById("txtFileInput"),
+        dropZone: document.getElementById("drama-file"),
+        libraryGrid: document.getElementById("libraryGrid"),
+        librarySearch: document.getElementById("librarySearch"),
+        libraryNoResults: document.getElementById("libraryNoResults"),
+        skipI: document.getElementById("skipNonSyllabicI"),
+        skipNasals: document.getElementById("skipNasals"),
+        aggregation: document.getElementById("aggregationMode"),
+        status: document.getElementById("status"),
+        results: document.getElementById("results"),
+        resultsMeta: document.getElementById("resultsMeta"),
+        summaryGrid: document.getElementById("summaryGrid"),
+        resultBody: document.getElementById("resultBody"),
+        frontBackScaleToggle: document.getElementById("frontBackScaleToggle"),
+        heightScaleToggle: document.getElementById("heightScaleToggle"),
+        frontBackScaleNote: document.getElementById("frontBackScaleNote"),
+        heightScaleNote: document.getElementById("heightScaleNote")
+      };
+
+      const state = {
+        analyzed: [],
+        sourceLines: 0,
+        skippedActors: 0,
+        removedStageChars: 0,
+        mergedLines: 0,
+        charts: [],
+        profileScaleMode: { frontBack: "zoom", height: "zoom" }
+      };
+
+      function init() {
+        renderLibrary(APP_CONFIG.library);
+        DOM.analyze.addEventListener("click", analyzeCurrentText);
+        DOM.clear.addEventListener("click", clearAll);
+        DOM.csv.addEventListener("click", exportCsv);
+        DOM.fileInput.addEventListener("change", e => loadTxtFile(e.target.files?.[0]));
+        DOM.librarySearch.addEventListener("input", filterLibrary);
+        DOM.skipI.addEventListener("change", reanalyzeIfPossible);
+        DOM.skipNasals.addEventListener("change", reanalyzeIfPossible);
+        DOM.aggregation.addEventListener("change", () => {
+          if (state.analyzed.length) renderAggregateResults();
+        });
+        DOM.frontBackScaleToggle.addEventListener("click", () => toggleProfileScale("frontBack"));
+        DOM.heightScaleToggle.addEventListener("click", () => toggleProfileScale("height"));
+
+        ["dragenter", "dragover"].forEach(name => DOM.dropZone.addEventListener(name, e => {
+          e.preventDefault(); DOM.dropZone.classList.add("drag-over");
+        }));
+        ["dragleave", "drop"].forEach(name => DOM.dropZone.addEventListener(name, e => {
+          e.preventDefault(); DOM.dropZone.classList.remove("drag-over");
+        }));
+        DOM.dropZone.addEventListener("drop", e => loadTxtFile(e.dataTransfer?.files?.[0]));
+      }
+
+      function renderLibrary(items) {
+        DOM.libraryGrid.replaceChildren();
+        const fragment = document.createDocumentFragment();
+        items.forEach(([author, title, path]) => {
+          const article = document.createElement("article");
+          article.className = "library-card";
+          article.dataset.search = `${author} ${title}`.toLocaleLowerCase("pl");
+          article.innerHTML = `
+        <img src="assets/folder2.png" alt="folder icon" />
+        <div class="library-author">${escapeHtml(author)}</div>
+        <div class="library-title">${escapeHtml(title)}</div>
+        <button type="button" class="library-select-button">Wybierz</button>`;
+          article.querySelector("button").addEventListener("click", () => loadLibraryText(path, title));
+          fragment.append(article);
+        });
+        DOM.libraryGrid.append(fragment);
+      }
+
+      function normalizeLibrarySearch(value) {
+        return String(value || "")
+          .toLocaleLowerCase("pl")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/ł/g, "l")
+          .replace(/[^a-z0-9]+/g, " ")
+          .trim();
+      }
+
+      function filterLibrary() {
+        const query = normalizeLibrarySearch(DOM.librarySearch.value);
+        const terms = query ? query.split(/\s+/).filter(Boolean) : [];
+        let visible = 0;
+
+        DOM.libraryGrid.querySelectorAll(".library-card").forEach(card => {
+          const haystack = normalizeLibrarySearch(card.dataset.search || card.textContent);
+          const show = terms.length === 0 || terms.every(term => haystack.includes(term));
+
+          // Nie polegamy wyłącznie na atrybucie hidden: .library-card ma display:flex,
+          // więc jawnie wyłączamy kartę z layoutu.
+          card.hidden = !show;
+          card.style.display = show ? "" : "none";
+          card.setAttribute("aria-hidden", show ? "false" : "true");
+          if (show) visible++;
+        });
+
+        DOM.libraryNoResults.style.display = visible ? "none" : "block";
+      }
+
+      async function loadLibraryText(path, title) {
+        setStatus(`Ładuję: ${title}…`);
+        try {
+          const response = await fetch(path);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          DOM.input.value = await response.text();
+          setStatus(`Załadowano „${title}”. Rozpoczynam analizę…`);
+          analyzeCurrentText();
+        } catch (error) {
+          console.error(error);
+          setStatus("Nie udało się wczytać pliku bibliotecznego. Uruchom stronę przez HTTP/HTTPS i sprawdź ścieżkę assets/biblioteka/.", true);
+        }
+      }
+
+      function loadTxtFile(file) {
+        if (!file) return;
+        if (!/\.txt$/i.test(file.name) && file.type !== "text/plain") {
+          setStatus("Wybierz plik tekstowy .txt.", true); return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          DOM.input.value = String(reader.result || "");
+          setStatus(`Wczytano plik „${file.name}”.`);
+          analyzeCurrentText();
+        };
+        reader.onerror = () => setStatus("Nie udało się odczytać pliku.", true);
+        reader.readAsText(file, "utf-8");
+      }
+
+      function reanalyzeIfPossible() {
+        if (DOM.input.value.trim()) analyzeCurrentText();
+      }
+
+      function analyzeCurrentText() {
+        const text = DOM.input.value.replace(/^\uFEFF/, "");
+        if (!text.trim()) { setStatus("Wprowadź tekst do analizy.", true); return; }
+
+        const reconstructed = reconstructVerses(text);
+        const options = { skipI: DOM.skipI.checked, skipNasals: DOM.skipNasals.checked };
+        const analyzed = reconstructed.verses
+          .map((line, index) => analyzeVerse(line.text, index + 1, options, line.shared))
+          .filter(Boolean);
+
+        state.analyzed = analyzed;
+        state.sourceLines = reconstructed.sourceLines;
+        state.skippedActors = reconstructed.skippedActors;
+        state.removedStageChars = reconstructed.removedStageChars;
+        state.mergedLines = reconstructed.mergedLines;
+
+        if (!analyzed.length) {
+          setStatus("Po pominięciu osób dramatu i didaskaliów nie pozostały wersy do analizy.", true);
+          DOM.results.classList.remove("visible");
+          DOM.csv.disabled = true;
+          return;
+        }
+
+        renderVerseTable();
+        renderAggregateResults();
+        DOM.results.classList.add("visible");
+        DOM.csv.disabled = false;
+        setStatus(`Gotowe: ${analyzed.length} zrekonstruowanych wersów.`);
+        DOM.results.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function reconstructVerses(text) {
+        const normalized = text.replace(/\r\n?/g, "\n");
+        const stripped = stripStageDirections(normalized);
+        const rawLines = stripped.text.split("\n");
+        const verses = [];
+        let candidateIndex = null;
+        let skippedActors = 0;
+        let mergedLines = 0;
+
+        rawLines.forEach(rawLine => {
+          const trimmed = rawLine.trim();
+          if (!trimmed || trimmed.startsWith("++")) return; // pusta linia / techniczny separator nie zrywa kandydata
+
+          if (isActorLine(trimmed)) {
+            skippedActors++;
+            return; // zmiana mówcy nie zrywa antylaby
+          }
+
+          const leadingWhitespace = rawLine.match(/^[\t ]*/)?.[0] || "";
+          const indentWidth = [...leadingWhitespace].reduce((sum, ch) => sum + (ch === "\t" ? 24 : 1), 0);
+          const isSecondPart = indentWidth >= APP_CONFIG.sharedLineIndent && candidateIndex !== null;
+
+          if (isSecondPart) {
+            verses[candidateIndex].text = `${verses[candidateIndex].text} ${trimmed}`.replace(/\s+/g, " ").trim();
+            verses[candidateIndex].shared = true;
+            candidateIndex = null;
+            mergedLines++;
+            return;
+          }
+
+          verses.push({ text: trimmed.replace(/\s+/g, " "), shared: false });
+          candidateIndex = verses.length - 1;
+        });
+
+        return {
+          verses,
+          sourceLines: normalized.split("\n").length,
+          skippedActors,
+          mergedLines,
+          removedStageChars: stripped.removedChars
+        };
+      }
+
+      // Usuwa treść pomiędzy slashami, ale zachowuje znaki nowej linii i długość wcięć.
+      // Dzięki temu /didaskalium/ może znajdować się w osobnym wierszu, między częściami antylaby
+      // albo wewnątrz pojedynczego wersu.
+      function stripStageDirections(text) {
+        let inside = false;
+        let removedChars = 0;
+        let out = "";
+        for (const ch of text) {
+          if (ch === "/") {
+            inside = !inside;
+            removedChars++;
+            out += " ";
+            continue;
+          }
+          if (inside) {
+            if (ch === "\n") out += "\n";
+            else { out += " "; removedChars++; }
+          } else {
+            out += ch;
+          }
+        }
+        return { text: out, removedChars };
+      }
+
+      function isActorLine(line) {
+        return line === line.toUpperCase() && /\p{L}/u.test(line);
+      }
+
+      function analyzeVerse(text, number, options, shared) {
+        const syllables = getSyllableUnits(text, options);
+        if (!syllables.length) return null;
+        const ranges = splitSyllablesIntoThirds(syllables.length);
+        const segments = {};
+
+        for (const segment of SEGMENTS) {
+          const [start, end] = ranges[segment.key];
+          segments[segment.key] = analyzeSyllableSegment(text, syllables, start, end, options);
+        }
+
+        return { number, text, syllables: syllables.length, shared, ranges, segments };
+      }
+
+      // W tej analizie "sylaba" jest reprezentowana przez swoje samogłoskowe jądro.
+      // Ą i Ę zawsze pozostają jądrami dla potrzeb podziału wersu, nawet jeśli użytkownik
+      // wybierze pomijanie samogłosek nosowych w samych statystykach artykulacyjnych.
+      function getSyllableUnits(text, options) {
+        const units = [];
+        const lowerText = text.toLocaleLowerCase("pl");
+        let charIndex = 0;
+
+        for (const ch of text) {
+          const raw = ch.toLocaleLowerCase("pl");
+          const feature = VOWEL_FEATURES[raw];
+          if (feature) {
+            const nonSyllabicI = raw === "i" && options.skipI && isNonSyllabicI(lowerText, charIndex);
+            if (!nonSyllabicI) {
+              units.push({
+                char: ch,
+                raw,
+                feature,
+                charIndex,
+                charLength: ch.length
+              });
+            }
+          }
+          charIndex += ch.length;
+        }
+        return units;
+      }
+
+      function splitSyllablesIntoThirds(n) {
+        if (n <= 0) return { onset: [0, -1], middle: [0, -1], coda: [0, -1] };
+
+        if (n % 3 === 0) {
+          const third = n / 3;
+          return {
+            onset: [0, third - 1],
+            middle: [third, 2 * third - 1],
+            coda: [2 * third, n - 1]
+          };
+        }
+
+        // Jeśli 1/3 przebiega wewnątrz sylaby, ta sylaba rozpoczyna środek.
+        // Jeśli 2/3 przebiega wewnątrz sylaby, ta sylaba kończy środek.
+        // Dzięki temu "problematyczne" sylaby trafiają w całości tylko do części środkowej.
+        const onsetEnd = Math.floor(n / 3) - 1;
+        const middleStart = onsetEnd + 1;
+        const middleEnd = Math.ceil((2 * n) / 3) - 1;
+        const codaStart = middleEnd + 1;
+
+        return {
+          onset: [0, onsetEnd],
+          middle: [middleStart, middleEnd],
+          coda: [codaStart, n - 1]
+        };
+      }
+
+      function analyzeSyllableSegment(text, syllables, start, end, options) {
+        const counts = emptyCounts();
+        const vowels = [];
+        const selected = [];
+
+        for (let i = start; i <= end && i < syllables.length; i++) {
+          if (i < 0) continue;
+          const syllable = syllables[i];
+          selected.push(syllable);
+
+          const raw = syllable.raw;
+          const feature = syllable.feature;
+          if (feature.nasal && options.skipNasals) continue;
+
+          vowels.push({ raw, ...feature });
+          counts.total++;
+          counts[feature.fbClass]++;
+          counts[feature.heightClass]++;
+          counts.raw[raw] = (counts.raw[raw] || 0) + 1;
+          counts.fbSum += feature.fb;
+          counts.heightSum += feature.height;
+        }
+
+        const syllableStart = start >= 0 && start < syllables.length ? start + 1 : null;
+        const syllableEnd = end >= start && end >= 0 ? Math.min(end + 1, syllables.length) : null;
+        const nuclei = selected.map(s => s.raw).join(" · ");
+
+        return {
+          fragment: nuclei,
+          syllableStart,
+          syllableEnd,
+          syllableCount: selected.length,
+          counts,
+          vowels,
+          fbScore: counts.total ? counts.fbSum / counts.total : null,
+          heightScore: counts.total ? counts.heightSum / counts.total : null
+        };
+      }
+
+      function isNonSyllabicI(lowerText, charIndex) {
+        const pair = lowerText.slice(charIndex, charIndex + 2);
+        return APP_CONFIG.nonSyllabicISequences.has(pair);
+      }
+
+      function emptyCounts() {
+        return { total: 0, front: 0, central: 0, back: 0, high: 0, mid: 0, low: 0, fbSum: 0, heightSum: 0, raw: {} };
+      }
+
+      function renderVerseTable() {
+        const fragment = document.createDocumentFragment();
+        state.analyzed.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+        <td>${row.number}${row.shared ? '<br><span class="tag">scalony</span>' : ""}</td>
+        <td class="verse-text">${escapeHtml(row.text)}<br><small>${row.syllables} sylab</small></td>
+        ${SEGMENTS.map(s => segmentCell(row.segments[s.key])).join("")}`;
+          fragment.append(tr);
+        });
+        DOM.resultBody.replaceChildren(fragment);
+      }
+
+      function segmentCell(seg) {
+        const c = seg.counts;
+        const range = seg.syllableCount
+          ? (seg.syllableStart === seg.syllableEnd ? `syl. ${seg.syllableStart}` : `syl. ${seg.syllableStart}–${seg.syllableEnd}`)
+          : "brak sylab";
+        return `<td class="segment-cell">
+      <span class="segment-fragment">${escapeHtml(range)}</span>
+      <div class="segment-counts">
+        jądra: <b>${escapeHtml(seg.fragment || "–")}</b><br>
+        analizowane samogłoski: <b>${c.total}</b><br>
+        P/Ś/T: <b>${c.front}/${c.central}/${c.back}</b><br>
+        W/Śr/N: <b>${c.high}/${c.mid}/${c.low}</b>
+      </div>
+    </td>`;
+      }
+
+      function renderAggregateResults() {
+        const aggregate = getAggregateProfiles(state.analyzed, DOM.aggregation.value);
+        renderSummary(aggregate);
+        renderCharts(aggregate);
+        DOM.resultsMeta.textContent = `${state.analyzed.length} wersów; scalono ${state.mergedLines} rozbić/antylab; pominięto ${state.skippedActors} wierszy zapisanych wielkimi literami. Profil: ${DOM.aggregation.value === "verse" ? "średnia z wersów" : "ważony samogłoskami"}.`;
+      }
+
+      function getAggregateProfiles(rows, mode) {
+        const result = {};
+        SEGMENTS.forEach(({ key }) => {
+          const corpusCounts = emptyCounts();
+          const verseFb = [];
+          const verseHeight = [];
+
+          rows.forEach(row => {
+            const seg = row.segments[key];
+            addCounts(corpusCounts, seg.counts);
+            if (seg.fbScore !== null) verseFb.push(seg.fbScore);
+            if (seg.heightScore !== null) verseHeight.push(seg.heightScore);
+          });
+
+          result[key] = {
+            counts: corpusCounts,
+            fbScore: mode === "verse" ? average(verseFb) : safeDivide(corpusCounts.fbSum, corpusCounts.total),
+            heightScore: mode === "verse" ? average(verseHeight) : safeDivide(corpusCounts.heightSum, corpusCounts.total),
+            contributingVersesFb: verseFb.length,
+            contributingVersesHeight: verseHeight.length
+          };
+        });
+        return result;
+      }
+
+      function addCounts(target, source) {
+        ["total", "front", "central", "back", "high", "mid", "low", "fbSum", "heightSum"].forEach(k => target[k] += source[k]);
+        Object.entries(source.raw).forEach(([k, v]) => target.raw[k] = (target.raw[k] || 0) + v);
+      }
+
+      function renderSummary(aggregate) {
+        DOM.summaryGrid.innerHTML = SEGMENTS.map(({ key, label }) => {
+          const item = aggregate[key], c = item.counts;
+          return `<article class="summary-card">
+        <h3>${label}</h3>
+        <small>${c.total} obserwacji samogłoskowych</small>
+        <div class="score">
+          <div class="score-box"><span>przednia ↔ tylna</span><strong>${fmtScore(item.fbScore)}</strong></div>
+          <div class="score-box"><span>niska ↔ wysoka</span><strong>${fmtScore(item.heightScore)}</strong></div>
+        </div>
+        <div class="mini-counts">
+          <div>przednie<br><b>${pct(c.front, c.total)}</b></div><div>środkowe<br><b>${pct(c.central, c.total)}</b></div><div>tylne<br><b>${pct(c.back, c.total)}</b></div>
+          <div>wysokie<br><b>${pct(c.high, c.total)}</b></div><div>średnie<br><b>${pct(c.mid, c.total)}</b></div><div>niskie<br><b>${pct(c.low, c.total)}</b></div>
+        </div>
+      </article>`;
+        }).join("");
+      }
+
+      function renderCharts(aggregate) {
+        destroyCharts();
+        const labels = SEGMENTS.map(s => s.label);
+        const fb = SEGMENTS.map(s => aggregate[s.key].fbScore);
+        const height = SEGMENTS.map(s => aggregate[s.key].heightScore);
+
+        updateScaleControls(fb, height);
+
+        state.charts.push(new Chart(document.getElementById("frontBackChart"), {
+          type: "line",
+          data: { labels, datasets: [{ label: "Profil miejsca artykulacji", data: fb, tension: .25, pointRadius: 5, borderWidth: 2, borderColor: "#2f69d9", backgroundColor: "#2f69d9" }] },
+          options: profileChartOptions(
+            { minLabel: "przednia", midLabel: "środkowa", maxLabel: "tylna" },
+            getProfileScaleBounds(fb, state.profileScaleMode.frontBack)
+          )
+        }));
+        state.charts.push(new Chart(document.getElementById("heightChart"), {
+          type: "line",
+          data: { labels, datasets: [{ label: "Profil wysokości", data: height, tension: .25, pointRadius: 5, borderWidth: 2, borderColor: "#0073ce", backgroundColor: "#0073ce" }] },
+          options: profileChartOptions(
+            { minLabel: "niska", midLabel: "średnia", maxLabel: "wysoka" },
+            getProfileScaleBounds(height, state.profileScaleMode.height)
+          )
+        }));
+
+        state.charts.push(new Chart(document.getElementById("frontBackDistributionChart"), {
+          type: "bar",
+          data: {
+            labels, datasets: [
+              { label: "przednie", backgroundColor: "#2f69d9", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.front, aggregate[s.key].counts.total)) },
+              { label: "środkowe", backgroundColor: "#9aa8bb", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.central, aggregate[s.key].counts.total)) },
+              { label: "tylne", backgroundColor: "#0073ce", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.back, aggregate[s.key].counts.total)) }
+            ]
+          },
+          options: distributionOptions()
+        }));
+        state.charts.push(new Chart(document.getElementById("heightDistributionChart"), {
+          type: "bar",
+          data: {
+            labels, datasets: [
+              { label: "wysokie", backgroundColor: "#2f69d9", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.high, aggregate[s.key].counts.total)) },
+              { label: "średnie", backgroundColor: "#7da9dc", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.mid, aggregate[s.key].counts.total)) },
+              { label: "niskie", backgroundColor: "#b7cbe5", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.low, aggregate[s.key].counts.total)) }
+            ]
+          },
+          options: distributionOptions()
+        }));
+      }
+
+      function getProfileScaleBounds(values, mode) {
+        if (mode === "full") return { min: -1, max: 1, stepSize: .5 };
+
+        const finiteValues = values.filter(Number.isFinite);
+        const maxAbs = finiteValues.length ? Math.max(...finiteValues.map(Math.abs)) : 0;
+        // Domyślne zbliżenie: co najmniej ±0,5. Jeśli obserwacja wychodzi poza
+        // ten zakres, rozszerzamy go symetrycznie do najbliższej dziesiątej.
+        const extent = Math.min(1, Math.max(.5, Math.ceil((maxAbs + .025) * 10) / 10));
+        return { min: -extent, max: extent, stepSize: extent <= .6 ? .1 : .2 };
+      }
+
+      function formatScaleNumber(value) {
+        const rounded = Math.round(Number(value) * 10) / 10;
+        if (Object.is(rounded, -0)) return "0";
+        return rounded > 0 ? `+${rounded.toFixed(1)}` : rounded.toFixed(1).replace("-", "−");
+      }
+
+      function updateScaleControls(fbValues, heightValues) {
+        const configs = [
+          { key: "frontBack", button: DOM.frontBackScaleToggle, note: DOM.frontBackScaleNote, values: fbValues },
+          { key: "height", button: DOM.heightScaleToggle, note: DOM.heightScaleNote, values: heightValues }
+        ];
+
+        configs.forEach(({ key, button, note, values }) => {
+          const mode = state.profileScaleMode[key];
+          const bounds = getProfileScaleBounds(values, mode);
+          if (mode === "full") {
+            button.textContent = "Przybliż skalę";
+            note.textContent = "Pełna skala −1…+1";
+            button.setAttribute("aria-pressed", "true");
+          } else {
+            button.textContent = "Pełna skala −1…+1";
+            note.textContent = `Zbliżenie: ${formatScaleNumber(bounds.min)}…${formatScaleNumber(bounds.max)}`;
+            button.setAttribute("aria-pressed", "false");
+          }
+        });
+      }
+
+      function toggleProfileScale(key) {
+        state.profileScaleMode[key] = state.profileScaleMode[key] === "full" ? "zoom" : "full";
+        if (state.analyzed.length) renderCharts(getAggregateProfiles(state.analyzed, DOM.aggregation.value));
+      }
+
+      function profileChartOptions(labels, bounds) {
+        return {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${Number(ctx.raw).toFixed(3)}` } } },
+          scales: {
+            y: {
+              min: bounds.min, max: bounds.max, ticks: {
+                stepSize: bounds.stepSize, callback(value) {
+                  const numeric = Number(value);
+                  if (Math.abs(numeric) < 1e-9) return `0 ${labels.midLabel}`;
+                  if (Math.abs(numeric + 1) < 1e-9) return `−1 ${labels.minLabel}`;
+                  if (Math.abs(numeric - 1) < 1e-9) return `+1 ${labels.maxLabel}`;
+                  return numeric > 0 ? `+${numeric.toFixed(1)}` : numeric.toFixed(1).replace("-", "−");
+                }
+              }, grid: { color: ctx => Math.abs(Number(ctx.tick?.value)) < 1e-9 ? "rgba(22,63,143,.38)" : "rgba(29,58,108,.08)", lineWidth: ctx => Math.abs(Number(ctx.tick?.value)) < 1e-9 ? 1.5 : 1 }
+            },
+            x: { grid: { display: false } }
+          }
+        };
+      }
+
+      function distributionOptions() {
+        return {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${Number(ctx.raw).toFixed(1)}%` } } },
+          scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => `${v}%` } }, x: { grid: { display: false } } }
+        };
+      }
+
+      function destroyCharts() {
+        state.charts.forEach(c => c.destroy());
+        state.charts = [];
+      }
+
+      function exportCsv() {
+        if (!state.analyzed.length) return;
+        const header = ["nr", "wers", "liczba_sylab", "scalony", "segment", "zakres_sylab", "jadra_sylab", "samogloski_analizowane", "przednie", "srodkowe", "tylne", "wysokie", "srednie", "niskie", "profil_przednia_tylna", "profil_niska_wysoka"];
+        const rows = [header];
+        state.analyzed.forEach(row => {
+          SEGMENTS.forEach(({ key, label }) => {
+            const s = row.segments[key], c = s.counts;
+            const zakres = s.syllableCount ? `${s.syllableStart}-${s.syllableEnd}` : "";
+            rows.push([row.number, row.text, row.syllables, row.shared ? "tak" : "nie", label, zakres, s.fragment, c.total, c.front, c.central, c.back, c.high, c.mid, c.low, s.fbScore ?? "", s.heightScore ?? ""]);
+          });
+        });
+        const csv = rows.map(r => r.map(csvCell).join(";")).join("\n");
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "profil_samoglosek_w_wersie.csv"; a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function clearAll() {
+        DOM.input.value = "";
+        DOM.fileInput.value = "";
+        DOM.resultBody.replaceChildren();
+        DOM.summaryGrid.replaceChildren();
+        DOM.results.classList.remove("visible");
+        DOM.csv.disabled = true;
+        destroyCharts();
+        state.analyzed = [];
+        setStatus("");
+      }
+
+      function setStatus(message, isError = false) {
+        DOM.status.textContent = message;
+        DOM.status.classList.toggle("error", isError);
+      }
+
+      function average(values) {
+        if (!values.length) return null;
+        return values.reduce((a, b) => a + b, 0) / values.length;
+      }
+      function safeDivide(a, b) { return b ? a / b : null; }
+      function percentage(a, b) { return b ? (a / b) * 100 : 0; }
+      function pct(a, b) { return b ? `${((a / b) * 100).toFixed(1)}%` : "–"; }
+      function fmtScore(v) { return v === null || Number.isNaN(v) ? "–" : `${v >= 0 ? "+" : ""}${v.toFixed(3)}`; }
+      function csvCell(value) { const s = String(value ?? ""); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
+      function escapeHtml(value) { return String(value).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch])); }
+
+      init();
+    })();
+  </script>
+</body>
+
+</html>
