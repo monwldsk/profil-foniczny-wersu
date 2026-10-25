@@ -1068,6 +1068,57 @@
       </section>
 
       <section class="table-panel">
+        <h3>Klauzula: pozycja liczona od końca wersu</h3>
+        <p class="table-note">
+          Ta analiza nie używa pozycji względnej ani wygładzania. <b>−1</b> oznacza ostatnią sylabę wersu,
+          <b>−2</b> przedostatnią, <b>−3</b> trzecią od końca itd. Każdy wers wnosi najwyżej jedną obserwację
+          do każdej pozycji, dlatego wykres pokazuje bezpośrednio profil kolejnych sylab klauzuli.
+        </p>
+        <div class="continuous-toolbar">
+          <label for="clauseDepth">Zakres klauzuli:
+            <select id="clauseDepth">
+              <option value="4">ostatnie 4 sylaby</option>
+              <option value="6" selected>ostatnie 6 sylab</option>
+              <option value="8">ostatnie 8 sylab</option>
+              <option value="10">ostatnie 10 sylab</option>
+            </select>
+          </label>
+          <span>Im dalsza pozycja od końca, tym mniej krótszych wersów może do niej wnieść obserwację.</span>
+        </div>
+        <div class="charts-grid">
+          <section class="chart-panel">
+            <h3>Klauzula → miejsce artykulacji</h3>
+            <p>−1 = samogłoski przednie, 0 = środkowe / równowaga, +1 = tylne.</p>
+            <div class="chart-wrap"><canvas id="clauseFrontBackChart"></canvas></div>
+          </section>
+          <section class="chart-panel">
+            <h3>Klauzula → wysokość samogłoski</h3>
+            <p>−1 = niskie, 0 = średnie / równowaga, +1 = wysokie.</p>
+            <div class="chart-wrap"><canvas id="clauseHeightChart"></canvas></div>
+          </section>
+        </div>
+        <p class="continuous-note">
+          To analiza opisowa. Nagły skok na −1, −2 lub −3 wskazuje miejsce warte dalszego testowania,
+          ale sam wykres nie rozstrzyga o istotności statystycznej.
+        </p>
+        <div class="table-scroll" style="max-height:360px">
+          <table>
+            <thead>
+              <tr>
+                <th>Pozycja od końca</th>
+                <th>Wersów (n)</th>
+                <th>Przednie / środkowe / tylne</th>
+                <th>Wysokie / średnie / niskie</th>
+                <th>Profil P↔T</th>
+                <th>Profil N↔W</th>
+              </tr>
+            </thead>
+            <tbody id="clauseResultBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="table-panel">
         <h3>Kontrola podziału – wers po wersie</h3>
         <p class="table-note">Podział jest wykonywany według liczby sylab. Jeżeli matematyczna granica 1/3 lub 2/3
           wypada wewnątrz sylaby, cała ta sylaba trafia do części środkowej. Liczby w komórkach: <b>P/Ś/T</b> =
@@ -1169,7 +1220,9 @@
         heightScaleToggle: document.getElementById("heightScaleToggle"),
         frontBackScaleNote: document.getElementById("frontBackScaleNote"),
         heightScaleNote: document.getElementById("heightScaleNote"),
-        continuousBandwidth: document.getElementById("continuousBandwidth")
+        continuousBandwidth: document.getElementById("continuousBandwidth"),
+        clauseDepth: document.getElementById("clauseDepth"),
+        clauseResultBody: document.getElementById("clauseResultBody")
       };
 
       const state = {
@@ -1195,6 +1248,9 @@
           if (state.analyzed.length) renderAggregateResults();
         });
         DOM.continuousBandwidth.addEventListener("change", () => {
+          if (state.analyzed.length) renderAggregateResults();
+        });
+        DOM.clauseDepth.addEventListener("change", () => {
           if (state.analyzed.length) renderAggregateResults();
         });
         DOM.frontBackScaleToggle.addEventListener("click", () => toggleProfileScale("frontBack"));
@@ -1405,23 +1461,28 @@
           segments[segment.key] = analyzeSyllableSegment(text, syllables, start, end);
         }
 
+        const syllableObservations = syllables.map((syllable, index) => {
+          const feature = syllable.feature;
+          return {
+            syllableIndex: index + 1,
+            fromEnd: syllables.length - index,
+            raw: syllable.raw,
+            normalized: feature.normalized,
+            fb: feature.fb,
+            height: feature.height,
+            fbClass: feature.fbClass,
+            heightClass: feature.heightClass
+          };
+        });
+
         const positionObservations = syllables.length > 1
-          ? syllables.map((syllable, index) => {
-            const feature = syllable.feature;
-            return {
-              syllableIndex: index + 1,
-              position: index / (syllables.length - 1),
-              raw: syllable.raw,
-              normalized: feature.normalized,
-              fb: feature.fb,
-              height: feature.height,
-              fbClass: feature.fbClass,
-              heightClass: feature.heightClass
-            };
-          }).filter(Boolean)
+          ? syllableObservations.map(observation => ({
+            ...observation,
+            position: (observation.syllableIndex - 1) / (syllables.length - 1)
+          }))
           : [];
 
-        return { number, text, syllables: syllables.length, shared, ranges, segments, positionObservations };
+        return { number, text, syllables: syllables.length, shared, ranges, segments, syllableObservations, positionObservations };
       }
 
       // W tej analizie "sylaba" jest reprezentowana przez swoje samogłoskowe jądro.
@@ -1626,6 +1687,46 @@
         });
       }
 
+      function getClauseProfile(rows, depth) {
+        const maxDepth = Math.max(1, Number(depth) || 6);
+        const points = [];
+
+        for (let fromEnd = maxDepth; fromEnd >= 1; fromEnd--) {
+          const observations = [];
+          rows.forEach(row => {
+            const obs = (row.syllableObservations || []).find(item => item.fromEnd === fromEnd);
+            if (obs) observations.push(obs);
+          });
+
+          const counts = emptyCounts();
+          observations.forEach(observation => addObservationToCounts(counts, observation));
+
+          points.push({
+            fromEnd,
+            label: fromEnd === 1 ? "−1 (ostatnia)" : `−${fromEnd}`,
+            observations: observations.length,
+            counts,
+            fb: observations.length ? counts.fbSum / observations.length : null,
+            height: observations.length ? counts.heightSum / observations.length : null
+          });
+        }
+
+        return points;
+      }
+
+      function addObservationToCounts(counts, observation) {
+        counts.total++;
+        counts.fbSum += observation.fb;
+        counts.heightSum += observation.height;
+        if (observation.fbClass === "front") counts.front++;
+        else if (observation.fbClass === "central") counts.central++;
+        else if (observation.fbClass === "back") counts.back++;
+        if (observation.heightClass === "high") counts.high++;
+        else if (observation.heightClass === "mid") counts.mid++;
+        else if (observation.heightClass === "low") counts.low++;
+        counts.raw[observation.raw] = (counts.raw[observation.raw] || 0) + 1;
+      }
+
       function epanechnikovWeight(distance, bandwidth) {
         const u = Math.abs(distance) / bandwidth;
         return u <= 1 ? 1 - u * u : 0;
@@ -1740,6 +1841,10 @@
           Number(DOM.continuousBandwidth.value)
         );
         renderContinuousCharts(continuous);
+
+        const clause = getClauseProfile(state.analyzed, Number(DOM.clauseDepth.value));
+        renderClauseCharts(clause);
+        renderClauseTable(clause);
       }
 
       function renderContinuousCharts(profile) {
@@ -1774,6 +1879,117 @@
             heightBounds
           )
         }));
+      }
+
+      function renderClauseCharts(profile) {
+        const labels = profile.map(point => point.label);
+        const fbValues = profile.map(point => point.fb).filter(Number.isFinite);
+        const heightValues = profile.map(point => point.height).filter(Number.isFinite);
+        const fbBounds = getProfileScaleBounds(fbValues, "zoom");
+        const heightBounds = getProfileScaleBounds(heightValues, "zoom");
+
+        state.charts.push(new Chart(document.getElementById("clauseFrontBackChart"), {
+          type: "line",
+          data: {
+            labels,
+            datasets: [{
+              label: "Klauzula — miejsce artykulacji",
+              data: profile.map(point => point.fb),
+              tension: .18, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5,
+              borderColor: "#2f69d9", backgroundColor: "#2f69d9", spanGaps: false
+            }]
+          },
+          options: clauseChartOptions(
+            { minLabel: "przednia", midLabel: "środkowa", maxLabel: "tylna" },
+            fbBounds,
+            profile
+          )
+        }));
+
+        state.charts.push(new Chart(document.getElementById("clauseHeightChart"), {
+          type: "line",
+          data: {
+            labels,
+            datasets: [{
+              label: "Klauzula — wysokość",
+              data: profile.map(point => point.height),
+              tension: .18, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5,
+              borderColor: "#0073ce", backgroundColor: "#0073ce", spanGaps: false
+            }]
+          },
+          options: clauseChartOptions(
+            { minLabel: "niska", midLabel: "średnia", maxLabel: "wysoka" },
+            heightBounds,
+            profile
+          )
+        }));
+      }
+
+      function renderClauseTable(profile) {
+        DOM.clauseResultBody.innerHTML = profile.slice().reverse().map(point => {
+          const c = point.counts;
+          return `<tr>
+            <td><b>${escapeHtml(point.label)}</b></td>
+            <td>${point.observations}</td>
+            <td>P ${pct(c.front, c.total)} · Ś ${pct(c.central, c.total)} · T ${pct(c.back, c.total)}</td>
+            <td>W ${pct(c.high, c.total)} · Śr ${pct(c.mid, c.total)} · N ${pct(c.low, c.total)}</td>
+            <td>${fmtScore(point.fb)}</td>
+            <td>${fmtScore(point.height)}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      function clauseChartOptions(labels, bounds, profile) {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title(items) {
+                  const index = items?.[0]?.dataIndex;
+                  const point = Number.isInteger(index) ? profile[index] : null;
+                  if (!point) return "";
+                  return point.fromEnd === 1
+                    ? "−1: ostatnia sylaba"
+                    : `−${point.fromEnd}: ${point.fromEnd}. sylaba od końca`;
+                },
+                label(ctx) {
+                  const y = Number(ctx.raw);
+                  return Number.isFinite(y) ? ` profil: ${y >= 0 ? "+" : ""}${y.toFixed(3)}` : " brak danych";
+                },
+                afterLabel(ctx) {
+                  const point = profile[ctx.dataIndex];
+                  return ` wersów: ${point?.observations ?? 0}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: "pozycja sylaby liczona od końca wersu (−1 = ostatnia)" },
+              grid: { display: false }
+            },
+            y: {
+              min: bounds.min, max: bounds.max,
+              ticks: {
+                stepSize: bounds.stepSize,
+                callback(value) {
+                  const numeric = Number(value);
+                  if (Math.abs(numeric) < 1e-9) return `0 ${labels.midLabel}`;
+                  if (Math.abs(numeric + 1) < 1e-9) return `−1 ${labels.minLabel}`;
+                  if (Math.abs(numeric - 1) < 1e-9) return `+1 ${labels.maxLabel}`;
+                  return numeric > 0 ? `+${numeric.toFixed(1)}` : numeric.toFixed(1).replace("-", "−");
+                }
+              },
+              grid: {
+                color: ctx => Math.abs(Number(ctx.tick?.value)) < 1e-9 ? "rgba(22,63,143,.38)" : "rgba(29,58,108,.08)",
+                lineWidth: ctx => Math.abs(Number(ctx.tick?.value)) < 1e-9 ? 1.5 : 1
+              }
+            }
+          }
+        };
       }
 
       function continuousChartOptions(labels, bounds) {
@@ -1929,7 +2145,7 @@
       function exportPositionCsv() {
         if (!state.analyzed.length) return;
         const header = [
-          "nr", "wers", "liczba_sylab", "scalony", "sylaba", "pozycja_wzgledna",
+          "nr", "wers", "liczba_sylab", "scalony", "sylaba", "pozycja_wzgledna", "pozycja_od_konca",
           "samogloska", "samogloska_znormalizowana", "miejsce_artykulacji_kod",
           "wysokosc_kod", "klasa_miejsca", "klasa_wysokosci"
         ];
@@ -1939,7 +2155,7 @@
           (row.positionObservations || []).forEach(observation => {
             rows.push([
               row.number, row.text, row.syllables, row.shared ? "tak" : "nie",
-              observation.syllableIndex, observation.position.toFixed(6), observation.raw,
+              observation.syllableIndex, observation.position.toFixed(6), -observation.fromEnd, observation.raw,
               observation.normalized, observation.fb, observation.height,
               observation.fbClass, observation.heightClass
             ]);
@@ -1966,6 +2182,7 @@
         DOM.fileInput.value = "";
         DOM.resultBody.replaceChildren();
         DOM.summaryGrid.replaceChildren();
+        DOM.clauseResultBody.replaceChildren();
         DOM.results.classList.remove("visible");
         DOM.csv.disabled = true;
         DOM.positionCsv.disabled = true;
