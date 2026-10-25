@@ -673,6 +673,41 @@
       letter-spacing: .04em;
     }
 
+    .continuous-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 4px 0 16px;
+      color: #53657a;
+      font-size: 12px;
+    }
+
+    .continuous-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+
+    .continuous-toolbar select {
+      padding: 7px 9px;
+      border: 1px solid #cbdced;
+      border-radius: 7px;
+      background: #fff;
+      color: #17385f;
+    }
+
+    .continuous-note {
+      max-width: 900px;
+      margin: 0 auto 12px;
+      color: #65758b;
+      font-size: 12px;
+      line-height: 1.55;
+      text-align: center;
+    }
+
     .method-note {
       margin-top: 18px;
       padding: 14px;
@@ -821,7 +856,9 @@
 
       <div class="lead">
         <p>
-          Celem niniejszego projektu jest ustalenie, na podstawie obszernego korpusu literatury polskiej, czy da się
+          Strona stanowi część projektu <a href="https://monwldsk.github.io/cyfrowa-analiza-literatury/"
+            target="_blank">Cyfrowa analiza literatury ↗</a> i powstaje jako eksperyment służący zbadaniu (na podstawie
+          obszernego korpusu literatury polskiej), czy da się
           zaobserwować jakąś zależność między <strong>pozycją sylaby w wersie</strong> a <strong>profilem artykulacyjnym
             samogłoski stanowiącej jej ośrodek</strong>. Badanie obejmuje w szczególności dwie podstawowe opozycje
           artykulacyjne: położenie samogłoski na osi <strong>przednia-środkowa-tylna</strong> oraz na osi
@@ -946,6 +983,7 @@
         <button id="analyzeButton" type="button">Analizuj</button>
         <button id="clearButton" type="button" class="secondary">Wyczyść</button>
         <button id="csvButton" type="button" class="ghost" disabled>Eksportuj CSV</button>
+        <button id="positionCsvButton" type="button" class="ghost" disabled>Eksportuj pozycje CSV</button>
       </div>
       <div id="status" class="status" role="status"></div>
     </section>
@@ -994,6 +1032,44 @@
           <div class="chart-wrap"><canvas id="heightDistributionChart"></canvas></div>
         </section>
       </div>
+
+      <section class="table-panel">
+        <h3>Model ciągły pozycji w wersie</h3>
+        <p class="table-note">
+          Oprócz przypisywania sylaby do jednej z trzech stref (nagłos-środek-wygłos), każdemu analizowanemu ośrodkowi
+          sylaby
+          przypisywana jest dokładna pozycja względna <code>p = (i − 1) / (n − 1)</code>: 0 oznacza początek wersu,
+          0,5 jego środek, a 1 koniec. Wersy jednosylabowe są pomijane w tej części analizy, ponieważ pozycja
+          względna nie jest dla nich określona przez ten wzór.
+        </p>
+        <div class="continuous-toolbar">
+          <label for="continuousBandwidth">Wygładzanie krzywej:
+            <select id="continuousBandwidth">
+              <option value="0.06">lokalne (h = 0,06)</option>
+              <option value="0.10" selected>zrównoważone (h = 0,10)</option>
+              <option value="0.15">silniejsze (h = 0,15)</option>
+            </select>
+          </label>
+          <span>Im mniejsze <i>h</i>, tym silniej widoczne są lokalne wahania.</span>
+        </div>
+        <div class="charts-grid">
+          <section class="chart-panel">
+            <h3>Pozycja względna → miejsce artykulacji</h3>
+            <p>Krzywa wygładzona: −1 = samogłoski przednie, 0 = środkowe / równowaga, +1 = tylne.</p>
+            <div class="chart-wrap"><canvas id="continuousFrontBackChart"></canvas></div>
+          </section>
+          <section class="chart-panel">
+            <h3>Pozycja względna → wysokość samogłoski</h3>
+            <p>Krzywa wygładzona: −1 = niskie, 0 = średnie / równowaga, +1 = wysokie.</p>
+            <div class="chart-wrap"><canvas id="continuousHeightChart"></canvas></div>
+          </section>
+        </div>
+        <p class="continuous-note">
+          Krzywa jest opisowym wygładzeniem jądrowym Epanechnikowa. Nie jest testem istotności statystycznej.
+          Tryb „średnia z wersów” nadaje każdemu wersowi równą wagę w każdym lokalnym punkcie krzywej; tryb
+          „ważona samogłoskami” traktuje każdy analizowany ośrodek sylaby jako osobną obserwację.
+        </p>
+      </section>
 
       <section class="table-panel">
         <h3>Kontrola podziału – wers po wersie</h3>
@@ -1080,6 +1156,7 @@
         analyze: document.getElementById("analyzeButton"),
         clear: document.getElementById("clearButton"),
         csv: document.getElementById("csvButton"),
+        positionCsv: document.getElementById("positionCsvButton"),
         fileInput: document.getElementById("txtFileInput"),
         dropZone: document.getElementById("drama-file"),
         libraryGrid: document.getElementById("libraryGrid"),
@@ -1096,7 +1173,8 @@
         frontBackScaleToggle: document.getElementById("frontBackScaleToggle"),
         heightScaleToggle: document.getElementById("heightScaleToggle"),
         frontBackScaleNote: document.getElementById("frontBackScaleNote"),
-        heightScaleNote: document.getElementById("heightScaleNote")
+        heightScaleNote: document.getElementById("heightScaleNote"),
+        continuousBandwidth: document.getElementById("continuousBandwidth")
       };
 
       const state = {
@@ -1114,11 +1192,15 @@
         DOM.analyze.addEventListener("click", analyzeCurrentText);
         DOM.clear.addEventListener("click", clearAll);
         DOM.csv.addEventListener("click", exportCsv);
+        DOM.positionCsv.addEventListener("click", exportPositionCsv);
         DOM.fileInput.addEventListener("change", e => loadTxtFile(e.target.files?.[0]));
         DOM.librarySearch.addEventListener("input", filterLibrary);
         DOM.skipI.addEventListener("change", reanalyzeIfPossible);
         DOM.skipNasals.addEventListener("change", reanalyzeIfPossible);
         DOM.aggregation.addEventListener("change", () => {
+          if (state.analyzed.length) renderAggregateResults();
+        });
+        DOM.continuousBandwidth.addEventListener("change", () => {
           if (state.analyzed.length) renderAggregateResults();
         });
         DOM.frontBackScaleToggle.addEventListener("click", () => toggleProfileScale("frontBack"));
@@ -1234,6 +1316,7 @@
           setStatus("Po pominięciu osób dramatu i didaskaliów nie pozostały wersy do analizy.", true);
           DOM.results.classList.remove("visible");
           DOM.csv.disabled = true;
+          DOM.positionCsv.disabled = true;
           return;
         }
 
@@ -1241,6 +1324,7 @@
         renderAggregateResults();
         DOM.results.classList.add("visible");
         DOM.csv.disabled = false;
+        DOM.positionCsv.disabled = false;
         setStatus(`Gotowe: ${analyzed.length} zrekonstruowanych wersów.`);
         DOM.results.scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -1327,7 +1411,24 @@
           segments[segment.key] = analyzeSyllableSegment(text, syllables, start, end, options);
         }
 
-        return { number, text, syllables: syllables.length, shared, ranges, segments };
+        const positionObservations = syllables.length > 1
+          ? syllables.map((syllable, index) => {
+            const feature = syllable.feature;
+            if (feature.nasal && options.skipNasals) return null;
+            return {
+              syllableIndex: index + 1,
+              position: index / (syllables.length - 1),
+              raw: syllable.raw,
+              normalized: feature.normalized,
+              fb: feature.fb,
+              height: feature.height,
+              fbClass: feature.fbClass,
+              heightClass: feature.heightClass
+            };
+          }).filter(Boolean)
+          : [];
+
+        return { number, text, syllables: syllables.length, shared, ranges, segments, positionObservations };
       }
 
       // W tej analizie "sylaba" jest reprezentowana przez swoje samogłoskowe jądro.
@@ -1494,6 +1595,84 @@
         return result;
       }
 
+      function getContinuousProfiles(rows, mode, bandwidth) {
+        const h = Number(bandwidth) || 0.10;
+        const grid = Array.from({ length: 51 }, (_, index) => index / 50);
+
+        return grid.map(position => {
+          if (mode === "verse") {
+            const verseFb = [];
+            const verseHeight = [];
+            let observations = 0;
+
+            rows.forEach(row => {
+              const local = localWeightedProfile(row.positionObservations || [], position, h);
+              if (local.weight > 0) {
+                verseFb.push(local.fb);
+                verseHeight.push(local.height);
+                observations += local.observations;
+              }
+            });
+
+            return {
+              position,
+              fb: average(verseFb),
+              height: average(verseHeight),
+              contributingVerses: verseFb.length,
+              observations
+            };
+          }
+
+          const pooled = [];
+          rows.forEach(row => pooled.push(...(row.positionObservations || [])));
+          const local = localWeightedProfile(pooled, position, h);
+          return {
+            position,
+            fb: local.fb,
+            height: local.height,
+            contributingVerses: countContributingVerses(rows, position, h),
+            observations: local.observations
+          };
+        });
+      }
+
+      function epanechnikovWeight(distance, bandwidth) {
+        const u = Math.abs(distance) / bandwidth;
+        return u <= 1 ? 1 - u * u : 0;
+      }
+
+      function localWeightedProfile(observations, position, bandwidth) {
+        let weight = 0;
+        let fb = 0;
+        let height = 0;
+        let count = 0;
+
+        observations.forEach(observation => {
+          const w = epanechnikovWeight(observation.position - position, bandwidth);
+          if (w <= 0) return;
+          weight += w;
+          fb += observation.fb * w;
+          height += observation.height * w;
+          count++;
+        });
+
+        return {
+          weight,
+          fb: weight ? fb / weight : null,
+          height: weight ? height / weight : null,
+          observations: count
+        };
+      }
+
+      function countContributingVerses(rows, position, bandwidth) {
+        return rows.reduce((count, row) => {
+          const contributes = (row.positionObservations || []).some(observation =>
+            epanechnikovWeight(observation.position - position, bandwidth) > 0
+          );
+          return count + (contributes ? 1 : 0);
+        }, 0);
+      }
+
       function addCounts(target, source) {
         ["total", "front", "central", "back", "high", "mid", "low", "fbSum", "heightSum"].forEach(k => target[k] += source[k]);
         Object.entries(source.raw).forEach(([k, v]) => target.raw[k] = (target.raw[k] || 0) + v);
@@ -1564,6 +1743,101 @@
           },
           options: distributionOptions()
         }));
+
+        const continuous = getContinuousProfiles(
+          state.analyzed,
+          DOM.aggregation.value,
+          Number(DOM.continuousBandwidth.value)
+        );
+        renderContinuousCharts(continuous);
+      }
+
+      function renderContinuousCharts(profile) {
+        const fbValues = profile.map(point => point.fb).filter(Number.isFinite);
+        const heightValues = profile.map(point => point.height).filter(Number.isFinite);
+        const fbBounds = getProfileScaleBounds(fbValues, "zoom");
+        const heightBounds = getProfileScaleBounds(heightValues, "zoom");
+
+        const fbData = profile.map(point => ({
+          x: point.position, y: point.fb,
+          contributingVerses: point.contributingVerses, observations: point.observations
+        }));
+        const heightData = profile.map(point => ({
+          x: point.position, y: point.height,
+          contributingVerses: point.contributingVerses, observations: point.observations
+        }));
+
+        state.charts.push(new Chart(document.getElementById("continuousFrontBackChart"), {
+          type: "line",
+          data: { datasets: [{ label: "Profil ciągły miejsca artykulacji", data: fbData, tension: .28, pointRadius: 0, pointHitRadius: 8, borderWidth: 2.5, borderColor: "#2f69d9", backgroundColor: "#2f69d9", spanGaps: false }] },
+          options: continuousChartOptions(
+            { minLabel: "przednia", midLabel: "środkowa", maxLabel: "tylna" },
+            fbBounds
+          )
+        }));
+
+        state.charts.push(new Chart(document.getElementById("continuousHeightChart"), {
+          type: "line",
+          data: { datasets: [{ label: "Profil ciągły wysokości", data: heightData, tension: .28, pointRadius: 0, pointHitRadius: 8, borderWidth: 2.5, borderColor: "#0073ce", backgroundColor: "#0073ce", spanGaps: false }] },
+          options: continuousChartOptions(
+            { minLabel: "niska", midLabel: "średnia", maxLabel: "wysoka" },
+            heightBounds
+          )
+        }));
+      }
+
+      function continuousChartOptions(labels, bounds) {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          parsing: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title(items) {
+                  const x = items?.[0]?.raw?.x;
+                  return Number.isFinite(x) ? `Pozycja względna: ${x.toFixed(2)}` : "";
+                },
+                label(ctx) {
+                  const y = Number(ctx.raw?.y);
+                  return Number.isFinite(y) ? ` profil: ${y >= 0 ? "+" : ""}${y.toFixed(3)}` : " brak danych";
+                },
+                afterLabel(ctx) {
+                  return ` wersów: ${ctx.raw?.contributingVerses ?? 0}; obserwacji w oknie: ${ctx.raw?.observations ?? 0}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: "linear", min: 0, max: 1,
+              title: { display: true, text: "pozycja względna w wersie (0 = początek, 1 = koniec)" },
+              ticks: { stepSize: .25, callback: value => Number(value).toFixed(2).replace(".00", "") },
+              grid: {
+                color: ctx => Math.abs(Number(ctx.tick?.value) - .5) < 1e-9 ? "rgba(22,63,143,.28)" : "rgba(29,58,108,.08)",
+                lineWidth: ctx => Math.abs(Number(ctx.tick?.value) - .5) < 1e-9 ? 1.5 : 1
+              }
+            },
+            y: {
+              min: bounds.min, max: bounds.max,
+              ticks: {
+                stepSize: bounds.stepSize,
+                callback(value) {
+                  const numeric = Number(value);
+                  if (Math.abs(numeric) < 1e-9) return `0 ${labels.midLabel}`;
+                  if (Math.abs(numeric + 1) < 1e-9) return `−1 ${labels.minLabel}`;
+                  if (Math.abs(numeric - 1) < 1e-9) return `+1 ${labels.maxLabel}`;
+                  return numeric > 0 ? `+${numeric.toFixed(1)}` : numeric.toFixed(1).replace("-", "−");
+                }
+              },
+              grid: {
+                color: ctx => Math.abs(Number(ctx.tick?.value)) < 1e-9 ? "rgba(22,63,143,.38)" : "rgba(29,58,108,.08)",
+                lineWidth: ctx => Math.abs(Number(ctx.tick?.value)) < 1e-9 ? 1.5 : 1
+              }
+            }
+          }
+        };
       }
 
       function getProfileScaleBounds(values, mode) {
@@ -1662,6 +1936,41 @@
         URL.revokeObjectURL(url);
       }
 
+      function exportPositionCsv() {
+        if (!state.analyzed.length) return;
+        const header = [
+          "nr", "wers", "liczba_sylab", "scalony", "sylaba", "pozycja_wzgledna",
+          "samogloska", "samogloska_znormalizowana", "miejsce_artykulacji_kod",
+          "wysokosc_kod", "klasa_miejsca", "klasa_wysokosci"
+        ];
+        const rows = [header];
+
+        state.analyzed.forEach(row => {
+          (row.positionObservations || []).forEach(observation => {
+            rows.push([
+              row.number, row.text, row.syllables, row.shared ? "tak" : "nie",
+              observation.syllableIndex, observation.position.toFixed(6), observation.raw,
+              observation.normalized, observation.fb, observation.height,
+              observation.fbClass, observation.heightClass
+            ]);
+          });
+        });
+
+        if (rows.length === 1) {
+          setStatus("Brak danych pozycyjnych do eksportu (np. analizowane wersy są jednosylabowe).", true);
+          return;
+        }
+
+        const csv = rows.map(r => r.map(csvCell).join(";")).join("\n");
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "profil_samoglosek_pozycje_wzgledne.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
       function clearAll() {
         DOM.input.value = "";
         DOM.fileInput.value = "";
@@ -1669,6 +1978,7 @@
         DOM.summaryGrid.replaceChildren();
         DOM.results.classList.remove("visible");
         DOM.csv.disabled = true;
+        DOM.positionCsv.disabled = true;
         destroyCharts();
         state.analyzed = [];
         setStatus("");
