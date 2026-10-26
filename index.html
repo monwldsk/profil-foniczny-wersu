@@ -543,6 +543,10 @@
       color: #65758b;
     }
 
+    .results-header h2 {
+      text-align: left;
+    }
+
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1782,7 +1786,7 @@
         const aggregate = getAggregateProfiles(state.analyzed, DOM.aggregation.value);
         renderSummary(aggregate);
         renderCharts(aggregate);
-        DOM.resultsMeta.textContent = `${state.analyzed.length} wersów; scalono ${state.mergedLines} rozbić/antylab; pominięto ${state.skippedActors} wierszy zapisanych wielkimi literami. Profil: ${DOM.aggregation.value === "verse" ? "średnia z wersów" : "ważony samogłoskami"}.`;
+        DOM.resultsMeta.textContent = `${state.analyzed.length} wersów; scalono ${state.mergedLines} rozbić/antylab. Profil: ${DOM.aggregation.value === "verse" ? "średnia z wersów" : "ważony samogłoskami"}.`;
       }
 
       function getAggregateProfiles(rows, mode) {
