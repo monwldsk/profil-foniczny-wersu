@@ -844,6 +844,38 @@
       line-height: 1.55;
     }
 
+    .syllable-profile-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-width: 280px;
+      align-items: flex-start;
+    }
+
+    .syllable-profile-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border: 1px solid #dce7f8;
+      border-radius: 4px;
+      background: #fbfdff;
+      white-space: nowrap;
+    }
+
+    .syllable-profile-item strong {
+      color: #17385f;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .syllable-profile-item small {
+      color: #65758b;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -1342,10 +1374,10 @@
           <h2>Profil pozycyjny samogłosek</h2>
           <p id="resultsMeta"></p>
         </div>
-        <span class="tag">NAGŁOS · ŚRODEK · WYGŁOS</span>
+        <span class="tag">0% POCZĄTEK → 100% KONIEC</span>
       </div>
 
-      <div id="summaryGrid" class="summary-grid"></div>
+      <div id="summaryGrid" class="summary-grid hidden"></div>
 
       <section class="meter-distribution-panel">
         <h3>Zróżnicowanie wersyfikacyjne</h3>
@@ -1361,7 +1393,8 @@
       <div class="charts-grid">
         <section class="chart-panel">
           <h3>Oś przednia – środkowa – tylna</h3>
-          <p>−1 = przewaga samogłosek przednich, 0 = środkowych / równowaga, +1 = tylnych.</p>
+          <p>Profil miejsca artykulacji w przebiegu całego wersu. −1 = przewaga samogłosek przednich, 0 = środkowych /
+            równowaga, +1 = tylnych.</p>
           <div class="chart-toolbar">
             <span id="frontBackScaleNote" class="chart-scale-note">Zbliżenie skali wokół 0</span>
             <button id="frontBackScaleToggle" class="scale-toggle" type="button">Pełna skala −1…+1</button>
@@ -1370,7 +1403,8 @@
         </section>
         <section class="chart-panel">
           <h3>Oś niska – średnia – wysoka</h3>
-          <p>−1 = przewaga samogłosek niskich, 0 = średnich / równowaga, +1 = wysokich.</p>
+          <p>Profil wysokości samogłosek w przebiegu całego wersu. −1 = przewaga samogłosek niskich, 0 = średnich /
+            równowaga, +1 = wysokich.</p>
           <div class="chart-toolbar">
             <span id="heightScaleNote" class="chart-scale-note">Zbliżenie skali wokół 0</span>
             <button id="heightScaleToggle" class="scale-toggle" type="button">Pełna skala −1…+1</button>
@@ -1382,12 +1416,12 @@
       <div class="charts-grid">
         <section class="chart-panel">
           <h3>Rozkład miejsca artykulacji</h3>
-          <p>Udział procentowy samogłosek przednich, środkowych i tylnych w każdym odcinku.</p>
+          <p>Procentowy skład każdego 10-procentowego odcinka wersu: samogłoski przednie, środkowe i tylne.</p>
           <div class="chart-wrap"><canvas id="frontBackDistributionChart"></canvas></div>
         </section>
         <section class="chart-panel">
           <h3>Rozkład wysokości</h3>
-          <p>Udział procentowy samogłosek wysokich, średnich i niskich w każdym odcinku.</p>
+          <p>Procentowy skład każdego 10-procentowego odcinka wersu: samogłoski wysokie, średnie i niskie.</p>
           <div class="chart-wrap"><canvas id="heightDistributionChart"></canvas></div>
         </section>
       </div>
@@ -1498,19 +1532,19 @@
       </section>
 
       <section class="table-panel">
-        <h3>Kontrola podziału – wers po wersie</h3>
-        <p class="table-note">Podział jest wykonywany według liczby sylab. Jeżeli matematyczna granica 1/3 lub 2/3
-          wypada wewnątrz sylaby, cała ta sylaba trafia do części środkowej. Liczby w komórkach: <b>P/Ś/T</b> =
-          przednie/środkowe/tylne, <b>W/Śr/N</b> = wysokie/średnie/niskie.</p>
+        <h3>Kontrola danych – wers po wersie</h3>
+        <p class="table-note">
+          Dla każdej sylaby pokazano jej samogłoskowe jądro oraz podstawowe cechy artykulacyjne.
+          Skróty: <b>P/Ś/T</b> = przednia/środkowa/tylna, <b>W/Śr/N</b> = wysoka/średnia/niska.
+        </p>
         <div class="table-scroll">
           <table>
             <thead>
               <tr>
                 <th>#</th>
                 <th>Wers po rekonstrukcji</th>
-                <th>Nagłos</th>
-                <th>Środek</th>
-                <th>Wygłos</th>
+                <th>Sylaby</th>
+                <th>Profil sylaba po sylabie</th>
               </tr>
             </thead>
             <tbody id="resultBody"></tbody>
@@ -1519,12 +1553,11 @@
       </section>
 
       <div class="method-note">
-        <strong>Reguła segmentacji:</strong> długość wersu jest wyznaczana przez liczbę wykrytych sylab (czyli
-        samogłoskowych ośrodków sylab).
-        Granice części przypadają w 1/3 i 2/3 długości sylabicznej. Jeżeli granica wypada dokładnie pomiędzy sylabami,
-        części są dzielone w tym miejscu.
-        Jeżeli natomiast granica matematycznie wypada w środku sylaby, cała sylaba zostanie przypisana do części
-        środkowej. Segmenty nie nakładają się.
+        <strong>Reguła normalizacji pozycji:</strong>
+        położenie każdej sylaby jest określane względem długości danego wersu.
+        Pierwsza sylaba otrzymuje pozycję 0%, ostatnia 100%, a sylaby pośrednie
+        rozmieszczane są proporcjonalnie pomiędzy nimi.
+        Dzięki temu profil całego tekstu może obejmować wersy o różnej długości.
       </div>
     </section>
   </main>
@@ -1537,6 +1570,7 @@
         syllableReplacementRegex: /ie|ia|iu|ię|ią|io|ii|iy|ió/g,
         nonSyllabicISequences: new Set(["ie", "ia", "iu", "ię", "ią", "io", "ii", "iy", "ió"]),
         sharedLineIndent: 20,
+        normalizedPositionBins: 10,
         library: [
           ["Juliusz Słowacki", "Samuel Zborowski", "assets/biblioteka/slowacki-samuel-zborowski.txt"],
           ["Cyprian Norwid", "Pierścień Wielkiej Damy", "assets/biblioteka/norwid-pierscien-wielkiej-damy.txt"],
@@ -1989,14 +2023,32 @@
 
       function renderVerseTable() {
         const fragment = document.createDocumentFragment();
+
         state.analyzed.forEach(row => {
           const tr = document.createElement("tr");
+
+          const profileHtml = (row.syllableObservations || [])
+            .map(observation => {
+              const fb = getFbClassShort(observation.fbClass);
+              const height = getHeightClassShort(observation.heightClass);
+
+              return `
+                <span class="syllable-profile-item">
+                  <strong>${escapeHtml(observation.raw)}</strong>
+                  <small>${fb}/${height}</small>
+                </span>`;
+            })
+            .join("");
+
           tr.innerHTML = `
-        <td>${row.number}${row.shared ? '<br><span class="tag">scalony</span>' : ""}</td>
-        <td class="verse-text">${escapeHtml(row.text)}<br><small>${row.syllables} sylab</small></td>
-        ${SEGMENTS.map(s => segmentCell(row.segments[s.key])).join("")}`;
+            <td>${row.number}${row.shared ? '<br><span class="tag">scalony</span>' : ""}</td>
+            <td class="verse-text">${escapeHtml(row.text)}</td>
+            <td><b>${row.syllables}</b></td>
+            <td><div class="syllable-profile-list">${profileHtml}</div></td>`;
+
           fragment.append(tr);
         });
+
         DOM.resultBody.replaceChildren(fragment);
       }
 
@@ -2017,10 +2069,18 @@
       }
 
       function renderAggregateResults() {
-        const aggregate = getAggregateProfiles(state.analyzed, DOM.aggregation.value);
-        renderSummary(aggregate);
-        renderCharts(aggregate);
-        DOM.resultsMeta.textContent = `${state.analyzed.length} wersów; scalono ${state.mergedLines} rozbić/antylab. Profil: ${DOM.aggregation.value === "verse" ? "średnia z wersów" : "ważony samogłoskami"}.`;
+        const profile = getNormalizedPositionProfile(
+          state.analyzed,
+          APP_CONFIG.normalizedPositionBins,
+          DOM.aggregation.value
+        );
+
+        renderCharts(profile);
+
+        DOM.resultsMeta.textContent =
+          `${state.analyzed.length} wersów; scalono ${state.mergedLines} rozbić/antylab. ` +
+          `Profil całego wersu: ${APP_CONFIG.normalizedPositionBins} przedziałów pozycji względnej 0–100%. ` +
+          `Sposób liczenia: ${DOM.aggregation.value === "verse" ? "średnia z wersów" : "ważony samogłoskami"}.`;
       }
 
       function getAggregateProfiles(rows, mode) {
@@ -2115,6 +2175,182 @@
         counts.raw[observation.raw] = (counts.raw[observation.raw] || 0) + 1;
       }
 
+      function getRelativeSyllablePosition(observation, syllableCount) {
+        if (syllableCount <= 1) return 0.5;
+        return (observation.syllableIndex - 1) / (syllableCount - 1);
+      }
+
+      function getRelativePositionBinIndex(position, binCount) {
+        return Math.min(binCount - 1, Math.max(0, Math.floor(position * binCount)));
+      }
+
+      function getNormalizedPositionProfile(rows, binCount, mode) {
+        const bins = Array.from({ length: binCount }, (_, index) => ({
+          index,
+          start: index / binCount,
+          end: (index + 1) / binCount,
+          label: `${Math.round((index / binCount) * 100)}–${Math.round(((index + 1) / binCount) * 100)}%`,
+          counts: emptyCounts(),
+          contributingVerses: 0,
+          verseFbScores: [],
+          verseHeightScores: [],
+          verseFrontShares: [],
+          verseCentralShares: [],
+          verseBackShares: [],
+          verseHighShares: [],
+          verseMidShares: [],
+          verseLowShares: []
+        }));
+
+        rows.forEach(row => {
+          const perVerseBins = Array.from({ length: binCount }, () => []);
+
+          (row.syllableObservations || []).forEach(observation => {
+            const position = getRelativeSyllablePosition(observation, row.syllables);
+            const binIndex = getRelativePositionBinIndex(position, binCount);
+            perVerseBins[binIndex].push(observation);
+          });
+
+          perVerseBins.forEach((observations, binIndex) => {
+            if (!observations.length) return;
+
+            const bin = bins[binIndex];
+            const verseCounts = emptyCounts();
+
+            observations.forEach(observation => {
+              addObservationToCounts(bin.counts, observation);
+              addObservationToCounts(verseCounts, observation);
+            });
+
+            bin.contributingVerses++;
+            bin.verseFbScores.push(verseCounts.fbSum / verseCounts.total);
+            bin.verseHeightScores.push(verseCounts.heightSum / verseCounts.total);
+            bin.verseFrontShares.push(percentage(verseCounts.front, verseCounts.total));
+            bin.verseCentralShares.push(percentage(verseCounts.central, verseCounts.total));
+            bin.verseBackShares.push(percentage(verseCounts.back, verseCounts.total));
+            bin.verseHighShares.push(percentage(verseCounts.high, verseCounts.total));
+            bin.verseMidShares.push(percentage(verseCounts.mid, verseCounts.total));
+            bin.verseLowShares.push(percentage(verseCounts.low, verseCounts.total));
+          });
+        });
+
+        bins.forEach(bin => {
+          if (mode === "verse") {
+            bin.fbScore = average(bin.verseFbScores);
+            bin.heightScore = average(bin.verseHeightScores);
+            bin.distribution = {
+              front: average(bin.verseFrontShares) ?? 0,
+              central: average(bin.verseCentralShares) ?? 0,
+              back: average(bin.verseBackShares) ?? 0,
+              high: average(bin.verseHighShares) ?? 0,
+              mid: average(bin.verseMidShares) ?? 0,
+              low: average(bin.verseLowShares) ?? 0
+            };
+          } else {
+            bin.fbScore = safeDivide(bin.counts.fbSum, bin.counts.total);
+            bin.heightScore = safeDivide(bin.counts.heightSum, bin.counts.total);
+            bin.distribution = {
+              front: percentage(bin.counts.front, bin.counts.total),
+              central: percentage(bin.counts.central, bin.counts.total),
+              back: percentage(bin.counts.back, bin.counts.total),
+              high: percentage(bin.counts.high, bin.counts.total),
+              mid: percentage(bin.counts.mid, bin.counts.total),
+              low: percentage(bin.counts.low, bin.counts.total)
+            };
+          }
+        });
+
+        return bins;
+      }
+
+      function normalizedProfileChartOptions(labels, bounds, profile) {
+        const options = profileChartOptions(labels, bounds);
+
+        options.plugins.tooltip = {
+          callbacks: {
+            title(items) {
+              const index = items?.[0]?.dataIndex;
+              return Number.isInteger(index) ? `Pozycja ${profile[index].label}` : "";
+            },
+            label(ctx) {
+              const value = Number(ctx.raw);
+              return Number.isFinite(value)
+                ? ` profil: ${value >= 0 ? "+" : ""}${value.toFixed(3)}`
+                : " brak danych";
+            },
+            afterLabel(ctx) {
+              const point = profile[ctx.dataIndex];
+              return [
+                ` wersów: ${point?.contributingVerses ?? 0}`,
+                ` samogłosek: ${point?.counts?.total ?? 0}`
+              ];
+            }
+          }
+        };
+
+        options.scales.x.title = {
+          display: true,
+          text: "względna pozycja sylaby w wersie (0% = początek, 100% = koniec)"
+        };
+
+        return options;
+      }
+
+      function normalizedDistributionOptions(profile) {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                title(items) {
+                  const index = items?.[0]?.dataIndex;
+                  return Number.isInteger(index) ? `Pozycja ${profile[index].label}` : "";
+                },
+                label(ctx) {
+                  return ` ${ctx.dataset.label}: ${Number(ctx.raw).toFixed(1)}%`;
+                },
+                afterBody(items) {
+                  const index = items?.[0]?.dataIndex;
+                  const point = Number.isInteger(index) ? profile[index] : null;
+                  return point
+                    ? [`wersów: ${point.contributingVerses}`, `samogłosek: ${point.counts.total}`]
+                    : [];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+              grid: { display: false },
+              title: { display: true, text: "względna pozycja sylaby w wersie" }
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              min: 0,
+              max: 100,
+              ticks: { callback: value => `${value}%` }
+            }
+          }
+        };
+      }
+
+      function getFbClassShort(value) {
+        if (value === "front") return "P";
+        if (value === "central") return "Ś";
+        if (value === "back") return "T";
+        return "–";
+      }
+
+      function getHeightClassShort(value) {
+        if (value === "high") return "W";
+        if (value === "mid") return "Śr";
+        if (value === "low") return "N";
+        return "–";
+      }
+
       function addCounts(target, source) {
         ["total", "front", "central", "back", "high", "mid", "low", "fbSum", "heightSum"].forEach(k => target[k] += source[k]);
         Object.entries(source.raw).forEach(([k, v]) => target.raw[k] = (target.raw[k] || 0) + v);
@@ -2138,54 +2374,88 @@
         }).join("");
       }
 
-      function renderCharts(aggregate) {
+      function renderCharts(profile) {
         destroyCharts();
         renderMeterDistributionChart(state.analyzed);
 
-        const labels = SEGMENTS.map(s => s.label);
-        const fb = SEGMENTS.map(s => aggregate[s.key].fbScore);
-        const height = SEGMENTS.map(s => aggregate[s.key].heightScore);
+        const labels = profile.map(point => point.label);
+        const fb = profile.map(point => point.fbScore);
+        const height = profile.map(point => point.heightScore);
+        const finiteFb = fb.filter(Number.isFinite);
+        const finiteHeight = height.filter(Number.isFinite);
 
-        updateScaleControls(fb, height);
+        updateScaleControls(finiteFb, finiteHeight);
 
         state.charts.push(new Chart(document.getElementById("frontBackChart"), {
           type: "line",
-          data: { labels, datasets: [{ label: "Profil miejsca artykulacji", data: fb, tension: .25, pointRadius: 5, borderWidth: 2, borderColor: "#2f69d9", backgroundColor: "#2f69d9" }] },
-          options: profileChartOptions(
+          data: {
+            labels,
+            datasets: [{
+              label: "Profil miejsca artykulacji",
+              data: fb,
+              tension: .22,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              borderWidth: 2.5,
+              borderColor: "#2f69d9",
+              backgroundColor: "#2f69d9",
+              spanGaps: false
+            }]
+          },
+          options: normalizedProfileChartOptions(
             { minLabel: "przednia", midLabel: "środkowa", maxLabel: "tylna" },
-            getProfileScaleBounds(fb, state.profileScaleMode.frontBack)
+            getProfileScaleBounds(finiteFb, state.profileScaleMode.frontBack),
+            profile
           )
         }));
+
         state.charts.push(new Chart(document.getElementById("heightChart"), {
           type: "line",
-          data: { labels, datasets: [{ label: "Profil wysokości", data: height, tension: .25, pointRadius: 5, borderWidth: 2, borderColor: "#0073ce", backgroundColor: "#0073ce" }] },
-          options: profileChartOptions(
+          data: {
+            labels,
+            datasets: [{
+              label: "Profil wysokości",
+              data: height,
+              tension: .22,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              borderWidth: 2.5,
+              borderColor: "#0073ce",
+              backgroundColor: "#0073ce",
+              spanGaps: false
+            }]
+          },
+          options: normalizedProfileChartOptions(
             { minLabel: "niska", midLabel: "średnia", maxLabel: "wysoka" },
-            getProfileScaleBounds(height, state.profileScaleMode.height)
+            getProfileScaleBounds(finiteHeight, state.profileScaleMode.height),
+            profile
           )
         }));
 
         state.charts.push(new Chart(document.getElementById("frontBackDistributionChart"), {
           type: "bar",
           data: {
-            labels, datasets: [
-              { label: "przednie", backgroundColor: "#2f69d9", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.front, aggregate[s.key].counts.total)) },
-              { label: "środkowe", backgroundColor: "#9aa8bb", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.central, aggregate[s.key].counts.total)) },
-              { label: "tylne", backgroundColor: "#0073ce", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.back, aggregate[s.key].counts.total)) }
+            labels,
+            datasets: [
+              { label: "przednie", backgroundColor: "#2f69d9", data: profile.map(point => point.distribution.front) },
+              { label: "środkowe", backgroundColor: "#9aa8bb", data: profile.map(point => point.distribution.central) },
+              { label: "tylne", backgroundColor: "#0073ce", data: profile.map(point => point.distribution.back) }
             ]
           },
-          options: distributionOptions()
+          options: normalizedDistributionOptions(profile)
         }));
+
         state.charts.push(new Chart(document.getElementById("heightDistributionChart"), {
           type: "bar",
           data: {
-            labels, datasets: [
-              { label: "wysokie", backgroundColor: "#2f69d9", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.high, aggregate[s.key].counts.total)) },
-              { label: "średnie", backgroundColor: "#7da9dc", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.mid, aggregate[s.key].counts.total)) },
-              { label: "niskie", backgroundColor: "#b7cbe5", data: SEGMENTS.map(s => percentage(aggregate[s.key].counts.low, aggregate[s.key].counts.total)) }
+            labels,
+            datasets: [
+              { label: "wysokie", backgroundColor: "#2f69d9", data: profile.map(point => point.distribution.high) },
+              { label: "średnie", backgroundColor: "#7da9dc", data: profile.map(point => point.distribution.mid) },
+              { label: "niskie", backgroundColor: "#b7cbe5", data: profile.map(point => point.distribution.low) }
             ]
           },
-          options: distributionOptions()
+          options: normalizedDistributionOptions(profile)
         }));
 
         const clause = getClauseProfile(state.analyzed, Number(DOM.clauseDepth.value));
@@ -2547,7 +2817,7 @@
 
       function toggleProfileScale(key) {
         state.profileScaleMode[key] = state.profileScaleMode[key] === "full" ? "zoom" : "full";
-        if (state.analyzed.length) renderCharts(getAggregateProfiles(state.analyzed, DOM.aggregation.value));
+        if (state.analyzed.length) renderAggregateResults();
       }
 
       function profileChartOptions(labels, bounds) {
