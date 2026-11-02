@@ -1055,6 +1055,15 @@
           </div>
         </div>
 
+        <div class="method-note">
+          <strong>Uwaga dotycząca dawnych zapisów:</strong> znak <strong>é</strong> (tzw. e pochylone) w modelu
+          artykulacyjnym pozostaje samogłoską przednią (<strong>−1</strong> na osi
+          przednia–tylna), a na osi wysokości otrzymuje wartość <strong>+0,5</strong>, pośrednią
+          między <strong>e = 0</strong> i <strong>i = +1</strong>. W zestawieniach trójklasowych
+          (wysokie / średnie / niskie) jest przypisywany do klasy średnich; dokładna wartość
+          <strong>+0,5</strong> jest używana w profilach liczbowych i wykresach liniowych.
+        </div>
+
         <p>
           Analiza ma zweryfikować, czy dystrybucja określonych typów samogłosek w obrębie wersu jest przypadkowa, czy
           może wykazuje pewne tendencje związane z pozycją: <strong>nagłosową, środkową i
@@ -1372,7 +1381,8 @@
         <div class="option-card">
           <label><input id="skipNonSyllabicI" type="checkbox" checked />Pomijaj [i] w funkcji
             niezgłoskotwórczej</label>
-          <small>Pomija „i” w sekwencjach: <code>ie, ia, iu, ię, ią, io, ii, iy, ió</code>. Druga samogłoska pozostaje
+          <small>Pomija „i” w sekwencjach: <code>ie, ié, ia, iu, ię, ią, io, ii, iy, ió</code>. Druga samogłoska
+            pozostaje
             w
             analizie.</small>
         </div>
@@ -1599,8 +1609,8 @@
       "use strict";
 
       const APP_CONFIG = {
-        syllableReplacementRegex: /ie|ia|iu|ię|ią|io|ii|iy|ió/g,
-        nonSyllabicISequences: new Set(["ie", "ia", "iu", "ię", "ią", "io", "ii", "iy", "ió"]),
+        syllableReplacementRegex: /ie|ié|ia|iu|ię|ią|io|ii|iy|ió/g,
+        nonSyllabicISequences: new Set(["ie", "ié", "ia", "iu", "ię", "ią", "io", "ii", "iy", "ió"]),
         sharedLineIndent: 20,
         normalizedPositionBins: 10,
         maxRenderedVerseRows: 500,
@@ -1631,9 +1641,12 @@
 
       // Wartości osi: front/back: -1 przednia, 0 środkowa, +1 tylna.
       // height: +1 wysoka, 0 średnia, -1 niska.
+      // Historyczne é (e pochylone): przednie jak e, wysokość pośrednia między e i i = +0.5.
+      // W rozkładach trójklasowych pozostaje w klasie "mid", natomiast średnie liczone są z height = 0.5.
       const VOWEL_FEATURES = {
         a: { normalized: "a", fb: 0, height: -1, fbClass: "central", heightClass: "low" },
         e: { normalized: "e", fb: -1, height: 0, fbClass: "front", heightClass: "mid" },
+        é: { normalized: "é", fb: -1, height: 0.5, fbClass: "front", heightClass: "mid" },
         i: { normalized: "i", fb: -1, height: 1, fbClass: "front", heightClass: "high" },
         y: { normalized: "y", fb: -1, height: 1, fbClass: "front", heightClass: "high" },
         o: { normalized: "o", fb: 1, height: 0, fbClass: "back", heightClass: "mid" },
@@ -1971,13 +1984,15 @@
       }
 
       // W tej analizie "sylaba" jest reprezentowana przez swoje samogłoskowe jądro.
-      // Ą i Ę są pełnoprawnymi jądrami sylab i są analizowane zgodnie z własnymi cechami artykulacyjnymi.
+      // Ą, Ę i historyczne É są pełnoprawnymi jądrami sylab i są analizowane zgodnie z własnymi cechami artykulacyjnymi.
       function getSyllableUnits(text, options) {
         const units = [];
-        const lowerText = text.toLocaleLowerCase("pl");
+        // NFC scala również zapis rozłożony e + znak akcentu w pojedyncze "é".
+        const normalizedText = String(text || "").normalize("NFC");
+        const lowerText = normalizedText.toLocaleLowerCase("pl");
         let charIndex = 0;
 
-        for (const ch of text) {
+        for (const ch of normalizedText) {
           const raw = ch.toLocaleLowerCase("pl");
           const feature = VOWEL_FEATURES[raw];
           if (feature) {
