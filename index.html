@@ -8,6 +8,7 @@
 
   <title>Profil foniczny wersu – analiza pozycyjna samogłosek</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="icon" href="assets/favicon.png" />
   <style>
     :root {
@@ -690,6 +691,27 @@
       border-radius: 10px;
     }
 
+    .table-end-notice {
+      display: none;
+      padding: 14px 16px;
+      border-top: 1px solid #e5edf8;
+      background: #f5f9ff;
+      color: #53657a;
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .table-end-notice.visible {
+      display: block;
+    }
+
+    .table-end-notice button {
+      margin-left: 10px;
+      padding: 6px 12px;
+      font-size: 11px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -926,6 +948,12 @@
       .meter-chart-wrap {
         height: 360px;
         max-height: 360px;
+      }
+
+      .table-end-notice button {
+        display: block;
+        width: 100%;
+        margin: 10px 0 0;
       }
     }
 
@@ -1549,6 +1577,10 @@
             </thead>
             <tbody id="resultBody"></tbody>
           </table>
+          <div id="verseTableEndNotice" class="table-end-notice">
+            <span id="verseTableEndMessage"></span>
+            <button id="xlsxButton" type="button" class="ghost" disabled>Pobierz pełne dane XLSX</button>
+          </div>
         </div>
       </section>
 
@@ -1571,6 +1603,7 @@
         nonSyllabicISequences: new Set(["ie", "ia", "iu", "ię", "ią", "io", "ii", "iy", "ió"]),
         sharedLineIndent: 20,
         normalizedPositionBins: 10,
+        maxRenderedVerseRows: 500,
         library: [
           ["Adam Mickiewicz", "Pan Tadeusz", "assets/biblioteka/mickiewicz-pan-tadeusz.txt"],
           ["Leopold Staff", "Deszcz jesienny", "assets/biblioteka/staff-deszcz-jesienny.txt"],
@@ -1651,6 +1684,9 @@
         clear: document.getElementById("clearButton"),
         csv: document.getElementById("csvButton"),
         positionCsv: document.getElementById("positionCsvButton"),
+        xlsx: document.getElementById("xlsxButton"),
+        verseTableEndNotice: document.getElementById("verseTableEndNotice"),
+        verseTableEndMessage: document.getElementById("verseTableEndMessage"),
         fileInput: document.getElementById("txtFileInput"),
         dropZone: document.getElementById("drama-file"),
         libraryGrid: document.getElementById("libraryGrid"),
@@ -1689,6 +1725,7 @@
         DOM.clear.addEventListener("click", clearAll);
         DOM.csv.addEventListener("click", exportCsv);
         DOM.positionCsv.addEventListener("click", exportPositionCsv);
+        DOM.xlsx.addEventListener("click", exportControlXlsx);
         DOM.fileInput.addEventListener("change", e => loadTxtFile(e.target.files?.[0]));
         DOM.librarySearch.addEventListener("input", filterLibrary);
         DOM.skipI.addEventListener("change", reanalyzeIfPossible);
@@ -1815,6 +1852,8 @@
           DOM.results.classList.remove("visible");
           DOM.csv.disabled = true;
           DOM.positionCsv.disabled = true;
+          DOM.xlsx.disabled = true;
+          DOM.verseTableEndNotice.classList.remove("visible");
           return;
         }
 
@@ -1828,6 +1867,7 @@
 
         DOM.csv.disabled = false;
         DOM.positionCsv.disabled = false;
+        DOM.xlsx.disabled = false;
         setStatus(`Gotowe: ${analyzed.length} zrekonstruowanych wersów.`);
       }
 
@@ -2032,8 +2072,9 @@
 
       function renderVerseTable() {
         const fragment = document.createDocumentFragment();
+        const visibleRows = state.analyzed.slice(0, APP_CONFIG.maxRenderedVerseRows);
 
-        state.analyzed.forEach(row => {
+        visibleRows.forEach(row => {
           const tr = document.createElement("tr");
 
           const profileHtml = (row.syllableObservations || [])
@@ -2059,6 +2100,16 @@
         });
 
         DOM.resultBody.replaceChildren(fragment);
+
+        if (state.analyzed.length > APP_CONFIG.maxRenderedVerseRows) {
+          DOM.verseTableEndMessage.innerHTML =
+            `Wyświetlono pierwsze <b>${APP_CONFIG.maxRenderedVerseRows}</b> z <b>${state.analyzed.length}</b> wersów. ` +
+            `Pełne dane są dostępne w pliku XLSX.`;
+        } else {
+          DOM.verseTableEndMessage.innerHTML =
+            `Wyświetlono wszystkie <b>${state.analyzed.length}</b> wersy/wersów. Pełne dane możesz pobrać także w pliku XLSX.`;
+        }
+        DOM.verseTableEndNotice.classList.add("visible");
       }
 
       function segmentCell(seg) {
@@ -2923,6 +2974,60 @@
         URL.revokeObjectURL(url);
       }
 
+      function exportControlXlsx() {
+        if (!state.analyzed.length) return;
+        if (typeof XLSX === "undefined") {
+          setStatus("Nie udało się załadować biblioteki XLSX.", true);
+          return;
+        }
+
+        const verseRows = state.analyzed.map(row => ({
+          "Nr": row.number,
+          "Wers po rekonstrukcji": row.text,
+          "Liczba sylab": row.syllables,
+          "Scalony": row.shared ? "tak" : "nie",
+          "Profil sylaba po sylabie": (row.syllableObservations || [])
+            .map(observation => `${observation.raw} (${getFbClassShort(observation.fbClass)}/${getHeightClassShort(observation.heightClass)})`)
+            .join(" · ")
+        }));
+
+        const syllableRows = [];
+        state.analyzed.forEach(row => {
+          (row.syllableObservations || []).forEach(observation => {
+            syllableRows.push({
+              "Nr wersu": row.number,
+              "Wers": row.text,
+              "Liczba sylab w wersie": row.syllables,
+              "Scalony": row.shared ? "tak" : "nie",
+              "Pozycja od początku": observation.syllableIndex,
+              "Pozycja od końca": -observation.fromEnd,
+              "Samogłoska": observation.raw,
+              "Samogłoska znormalizowana": observation.normalized,
+              "Miejsce artykulacji – kod": observation.fb,
+              "Miejsce artykulacji – klasa": observation.fbClass,
+              "Wysokość – kod": observation.height,
+              "Wysokość – klasa": observation.heightClass
+            });
+          });
+        });
+
+        const workbook = XLSX.utils.book_new();
+        const verseSheet = XLSX.utils.json_to_sheet(verseRows);
+        const syllableSheet = XLSX.utils.json_to_sheet(syllableRows);
+
+        verseSheet["!cols"] = [
+          { wch: 8 }, { wch: 80 }, { wch: 14 }, { wch: 10 }, { wch: 80 }
+        ];
+        syllableSheet["!cols"] = [
+          { wch: 10 }, { wch: 70 }, { wch: 20 }, { wch: 10 }, { wch: 20 }, { wch: 18 },
+          { wch: 14 }, { wch: 24 }, { wch: 24 }, { wch: 24 }, { wch: 18 }, { wch: 22 }
+        ];
+
+        XLSX.utils.book_append_sheet(workbook, verseSheet, "Wersy");
+        XLSX.utils.book_append_sheet(workbook, syllableSheet, "Sylaby");
+        XLSX.writeFile(workbook, "profil_foniczny_kontrola_danych.xlsx", { compression: true });
+      }
+
       function clearAll() {
         DOM.input.value = "";
         DOM.fileInput.value = "";
@@ -2933,6 +3038,9 @@
         DOM.results.classList.remove("visible");
         DOM.csv.disabled = true;
         DOM.positionCsv.disabled = true;
+        DOM.xlsx.disabled = true;
+        DOM.verseTableEndNotice.classList.remove("visible");
+        DOM.verseTableEndMessage.textContent = "";
         destroyCharts();
         state.analyzed = [];
         setStatus("");
