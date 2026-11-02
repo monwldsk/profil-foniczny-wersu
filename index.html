@@ -808,6 +808,42 @@
       font-size: 12px;
     }
 
+    .meter-distribution-panel {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid #dce7f8;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .meter-distribution-panel h3 {
+      margin: 0 0 4px;
+    }
+
+    .meter-distribution-panel p {
+      margin: 0 0 10px;
+      color: #65758b;
+      font-size: 12px;
+    }
+
+    .meter-chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      max-height: 400px;
+    }
+
+    .meter-chart-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid #dce7f8;
+      border-radius: 10px;
+      color: #65758b;
+      background: #f5f9ff;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -853,6 +889,11 @@
 
       .vowel-map {
         grid-template-columns: 1fr;
+      }
+
+      .meter-chart-wrap {
+        height: 360px;
+        max-height: 360px;
       }
     }
 
@@ -1306,6 +1347,17 @@
 
       <div id="summaryGrid" class="summary-grid"></div>
 
+      <section class="meter-distribution-panel">
+        <h3>Zróżnicowanie wersyfikacyjne</h3>
+        <p>Procentowy udział poszczególnych formatów wierszowych wyznaczonych na podstawie liczby sylab w wersie.</p>
+        <div class="meter-chart-wrap">
+          <canvas id="meterDistributionChart"></canvas>
+        </div>
+        <div class="meter-chart-note">
+          Formaty poniżej 1% są grupowane (i sumowane) jako „Inne”.
+        </div>
+      </section>
+
       <div class="charts-grid">
         <section class="chart-panel">
           <h3>Oś przednia – środkowa – tylna</h3>
@@ -1524,6 +1576,35 @@
         { key: "middle", label: "Środek" },
         { key: "coda", label: "Wygłos" }
       ];
+
+      const METER_COLORS = {
+        1: "hsl(55, 50%, 70%)",
+        2: "hsl(30, 70%, 70%)",
+        3: "hsl(60, 70%, 70%)",
+        4: "hsl(90, 70%, 70%)",
+        5: "hsl(120, 70%, 70%)",
+        6: "hsl(150, 70%, 70%)",
+        7: "hsl(180, 70%, 70%)",
+        8: "hsl(210, 70%, 70%)",
+        9: "hsl(240, 70%, 70%)",
+        10: "hsl(270, 70%, 70%)",
+        11: "hsl(300, 70%, 70%)",
+        12: "hsl(330, 70%, 70%)",
+        13: "hsl(360, 70%, 70%)",
+        14: "hsl(18, 70%, 50%)",
+        15: "hsl(420, 70%, 70%)",
+        16: "hsl(450, 70%, 70%)",
+        17: "hsl(480, 70%, 70%)",
+        18: "hsl(510, 70%, 70%)",
+        19: "hsl(540, 70%, 70%)",
+        20: "hsl(570, 70%, 70%)",
+        21: "hsl(600, 70%, 70%)",
+        22: "hsl(630, 70%, 70%)",
+        23: "hsl(660, 70%, 70%)",
+        24: "hsl(690, 70%, 70%)",
+        25: "hsl(720, 70%, 70%)",
+        26: "hsl(750, 70%, 70%)"
+      };
 
       const DOM = {
         input: document.getElementById("inputText"),
@@ -2059,6 +2140,8 @@
 
       function renderCharts(aggregate) {
         destroyCharts();
+        renderMeterDistributionChart(state.analyzed);
+
         const labels = SEGMENTS.map(s => s.label);
         const fb = SEGMENTS.map(s => aggregate[s.key].fbScore);
         const height = SEGMENTS.map(s => aggregate[s.key].heightScore);
@@ -2112,6 +2195,94 @@
         const onset = getOnsetProfile(state.analyzed, Number(DOM.onsetDepth.value));
         renderOnsetCharts(onset);
         renderOnsetTable(onset);
+      }
+
+      function renderMeterDistributionChart(rows) {
+        const canvas = document.getElementById("meterDistributionChart");
+        if (!canvas || !rows.length) return;
+
+        const meterCounts = rows.reduce((counts, row) => {
+          const syllables = Number(row.syllables) || 0;
+          if (syllables > 0) {
+            counts[syllables] = (counts[syllables] || 0) + 1;
+          }
+          return counts;
+        }, {});
+
+        const total = Object.values(meterCounts).reduce((sum, count) => sum + count, 0);
+        if (!total) return;
+
+        const labels = [];
+        const values = [];
+        const colors = [];
+        let otherPercentage = 0;
+
+        Object.keys(meterCounts)
+          .sort((a, b) => Number(a) - Number(b))
+          .forEach(meter => {
+            const percentage = (meterCounts[meter] / total) * 100;
+
+            if (percentage < 1) {
+              otherPercentage += percentage;
+              return;
+            }
+
+            labels.push(`${meter}-zgłoskowiec`);
+            values.push(percentage);
+            colors.push(METER_COLORS[meter] || `hsl(${(Number(meter) * 31) % 360}, 70%, 70%)`);
+          });
+
+        if (otherPercentage > 0) {
+          labels.push("Inne (<1%)");
+          values.push(otherPercentage);
+          colors.push("hsl(120, 70%, 70%)");
+        }
+
+        state.charts.push(new Chart(canvas, {
+          type: "pie",
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              backgroundColor: colors,
+              borderColor: "#ffffff",
+              borderWidth: 3,
+              hoverOffset: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+              padding: 8
+            },
+            plugins: {
+              legend: {
+                position: "left",
+                align: "center",
+                title: {
+                  display: true,
+                  text: "Format wiersza",
+                  color: "#555555",
+                  font: { size: 14, weight: "700" },
+                  padding: { bottom: 12 }
+                },
+                labels: {
+                  boxWidth: 30,
+                  boxHeight: 17,
+                  padding: 13,
+                  color: "#56677d",
+                  font: { size: 15 }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: context => `${context.label}: ${Number(context.raw).toFixed(2)}%`
+                }
+              }
+            }
+          }
+        }));
       }
 
       function renderClauseCharts(profile) {
