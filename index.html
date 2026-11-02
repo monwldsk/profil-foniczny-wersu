@@ -1814,12 +1814,16 @@
         }
 
         renderVerseTable();
-        renderAggregateResults();
         DOM.results.classList.add("visible");
+
+        requestAnimationFrame(() => {
+          renderAggregateResults();
+          DOM.results.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
         DOM.csv.disabled = false;
         DOM.positionCsv.disabled = false;
         setStatus(`Gotowe: ${analyzed.length} zrekonstruowanych wersów.`);
-        DOM.results.scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
       function reconstructVerses(text) {
@@ -2523,6 +2527,12 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+              duration: 1200,
+              easing: "easeOutCubic",
+              animateRotate: true,
+              animateScale: true
+            },
             layout: {
               padding: 8
             },
