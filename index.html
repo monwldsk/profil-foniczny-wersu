@@ -1121,7 +1121,7 @@
 
           <div class="pilot-study__figures">
             <figure class="pilot-study__figure">
-              <img src="assets/charts/wykres_miejsce.png" alt="Wykres: klauzula – miejsce artykulacji">
+              <img src="assets/charts/wykres_miejsce2.png" alt="Wykres: klauzula – miejsce artykulacji">
             </figure>
             <figure class="pilot-study__figure">
               <img src="assets/charts/wykres_wysokosc.png" alt="Wykres: klauzula – wysokość samogłoski">
@@ -1164,7 +1164,7 @@
           </p>
           <div class="pilot-study__figures">
             <figure class="pilot-study__figure">
-              <img src="assets/charts/wykres_samuel_miejsce.png" alt="Wykres: klauzula – miejsce artykulacji">
+              <img src="assets/charts/wykres_samuel_miejsce2.png" alt="Wykres: klauzula – miejsce artykulacji">
             </figure>
             <figure class="pilot-study__figure">
               <img src="assets/charts/wykres_samuel_wysokosc.png" alt="Wykres: klauzula – wysokość samogłoski">
@@ -1176,7 +1176,7 @@
 
           <div class="pilot-study__figures">
             <figure class="pilot-study__figure">
-              <img src="assets/charts/wykres_oksytoniczny_miejsce.png" alt="Wykres: klauzula – miejsce artykulacji">
+              <img src="assets/charts/wykres_oksytoniczny_miejsce2.png" alt="Wykres: klauzula – miejsce artykulacji">
             </figure>
             <figure class="pilot-study__figure">
               <img src="assets/charts/wykres_oksytoniczny_wysokosc.png" alt="Wykres: klauzula – wysokość samogłoski">
@@ -1198,7 +1198,7 @@
           </p>
           <div class="pilot-study__figures">
             <figure class="pilot-study__figure">
-              <img src="assets/charts/wykres_pan_tadeusz_miejsce.png" alt="Wykres: klauzula – miejsce artykulacji">
+              <img src="assets/charts/wykres_pan_tadeusz_miejsce2.png" alt="Wykres: klauzula – miejsce artykulacji">
             </figure>
             <figure class="pilot-study__figure">
               <img src="assets/charts/wykres_pant_adeusz_wysokosc.png" alt="Wykres: klauzula – wysokość samogłoski">
@@ -1256,7 +1256,7 @@
 
           <div class="pilot-study__figures">
             <figure class="pilot-study__figure">
-              <img src="assets/charts/wykres_szewczyk_miejsce.png" alt="Wykres: klauzula – miejsce artykulacji">
+              <img src="assets/charts/wykres_szewczyk_miejsce2.png" alt="Wykres: klauzula – miejsce artykulacji">
             </figure>
             <figure class="pilot-study__figure">
               <img src="assets/charts/wykres_szewczyk_wysokosc.png" alt="Wykres: klauzula – wysokość samogłoski">
@@ -1410,7 +1410,7 @@
 
       <div class="method-note">
         <strong>Uwaga dotycząca dawnych zapisów:</strong> znak <strong>é</strong> (tzw. e pochylone) w modelu
-        artykulacyjnym pozostaje samogłoską przednią (umownie <strong>−1</strong> na osi
+        artykulacyjnym pozostaje samogłoską przednią (umownie <strong>+1</strong> na osi
         przednia–tylna), a na osi wysokości otrzymuje umowną wartość <strong>+0,5</strong>, pośrednią
         między <strong>e = 0</strong> i <strong>i = +1</strong>. W zestawieniach trójklasowych
         (wysokie / średnie / niskie) jest przypisywany do klasy średnich; dokładna wartość
@@ -1430,9 +1430,9 @@
 
       <div class="charts-grid">
         <section class="chart-panel">
-          <h3>Oś przednia – środkowa – tylna</h3>
-          <p>Profil miejsca artykulacji w przebiegu całego wersu. −1 = przewaga samogłosek przednich, 0 = środkowych /
-            równowaga, +1 = tylnych.</p>
+          <h3>Oś tylna – środkowa – przednia</h3>
+          <p>Profil miejsca artykulacji w przebiegu całego wersu. −1 = profil całkowicie tylny, 0 = środkowy /
+            równowaga, +1 = całkowicie przedni. Wartości ujemne oznaczają przewagę tylnych, dodatnie – przednich.</p>
           <div class="chart-toolbar">
             <span id="frontBackScaleNote" class="chart-scale-note">Zbliżenie skali wokół 0</span>
             <button id="frontBackScaleToggle" class="scale-toggle" type="button">Pełna skala −1…+1</button>
@@ -1490,7 +1490,7 @@
         <div class="charts-grid">
           <section class="chart-panel">
             <h3>Klauzula → miejsce artykulacji</h3>
-            <p>−1 = samogłoski przednie, 0 = środkowe / równowaga, +1 = tylne.</p>
+            <p>−1 = samogłoski tylne, 0 = środkowe / równowaga, +1 = przednie.</p>
             <div class="chart-wrap"><canvas id="clauseFrontBackChart"></canvas></div>
           </section>
           <section class="chart-panel">
@@ -1511,7 +1511,7 @@
                 <th>Wersów (n)</th>
                 <th>Przednie / środkowe / tylne</th>
                 <th>Wysokie / średnie / niskie</th>
-                <th>Profil P↔T</th>
+                <th>Profil T↔P (−1…+1)</th>
                 <th>Profil N↔W</th>
               </tr>
             </thead>
@@ -1546,7 +1546,7 @@
         <div class="charts-grid">
           <section class="chart-panel">
             <h3>Nagłos → miejsce artykulacji</h3>
-            <p>−1 = samogłoski przednie, 0 = środkowe / równowaga, +1 = tylne.</p>
+            <p>−1 = samogłoski tylne, 0 = środkowe / równowaga, +1 = przednie.</p>
             <div class="chart-wrap"><canvas id="onsetFrontBackChart"></canvas></div>
           </section>
           <section class="chart-panel">
@@ -1564,7 +1564,7 @@
                 <th>Wersów (n)</th>
                 <th>Przednie / środkowe / tylne</th>
                 <th>Wysokie / średnie / niskie</th>
-                <th>Profil P↔T</th>
+                <th>Profil T↔P</th>
                 <th>Profil N↔W</th>
               </tr>
             </thead>
@@ -1643,21 +1643,21 @@
         ]
       };
 
-      // Wartości osi: front/back: -1 przednia, 0 środkowa, +1 tylna.
+      // Wartości osi: front/back: -1 tylna, 0 środkowa, +1 przednia.
       // height: +1 wysoka, 0 średnia, -1 niska.
       // Historyczne é (e pochylone): przednie jak e, wysokość pośrednia między e i i = +0.5.
       // W rozkładach trójklasowych pozostaje w klasie "mid", natomiast średnie liczone są z height = 0.5.
       const VOWEL_FEATURES = {
         a: { normalized: "a", fb: 0, height: -1, fbClass: "central", heightClass: "low" },
-        e: { normalized: "e", fb: -1, height: 0, fbClass: "front", heightClass: "mid" },
-        é: { normalized: "é", fb: -1, height: 0.5, fbClass: "front", heightClass: "mid" },
-        i: { normalized: "i", fb: -1, height: 1, fbClass: "front", heightClass: "high" },
-        y: { normalized: "y", fb: -1, height: 1, fbClass: "front", heightClass: "high" },
-        o: { normalized: "o", fb: 1, height: 0, fbClass: "back", heightClass: "mid" },
-        u: { normalized: "u", fb: 1, height: 1, fbClass: "back", heightClass: "high" },
-        ó: { normalized: "u", fb: 1, height: 1, fbClass: "back", heightClass: "high" },
-        ą: { normalized: "ą", fb: 1, height: 0, fbClass: "back", heightClass: "mid" },
-        ę: { normalized: "ę", fb: -1, height: 0, fbClass: "front", heightClass: "mid" }
+        e: { normalized: "e", fb: +1, height: 0, fbClass: "front", heightClass: "mid" },
+        é: { normalized: "é", fb: +1, height: 0.5, fbClass: "front", heightClass: "mid" },
+        i: { normalized: "i", fb: +1, height: 1, fbClass: "front", heightClass: "high" },
+        y: { normalized: "y", fb: +1, height: 1, fbClass: "front", heightClass: "high" },
+        o: { normalized: "o", fb: -1, height: 0, fbClass: "back", heightClass: "mid" },
+        u: { normalized: "u", fb: -1, height: 1, fbClass: "back", heightClass: "high" },
+        ó: { normalized: "u", fb: -1, height: 1, fbClass: "back", heightClass: "high" },
+        ą: { normalized: "ą", fb: -1, height: 0, fbClass: "back", heightClass: "mid" },
+        ę: { normalized: "ę", fb: +1, height: 0, fbClass: "front", heightClass: "mid" }
       };
 
       const SEGMENTS = [
@@ -2442,7 +2442,7 @@
         <h3>${label}</h3>
         <small>${c.total} obserwacji samogłoskowych</small>
         <div class="score">
-          <div class="score-box"><span>przednia ↔ tylna</span><strong>${fmtScore(item.fbScore)}</strong></div>
+          <div class="score-box"><span>tylna ↔ przednia</span><strong>${fmtScore(item.fbScore)}</strong></div>
           <div class="score-box"><span>niska ↔ wysoka</span><strong>${fmtScore(item.heightScore)}</strong></div>
         </div>
         <div class="mini-counts">
@@ -2482,7 +2482,7 @@
             }]
           },
           options: normalizedProfileChartOptions(
-            { minLabel: "przednia", midLabel: "środkowa", maxLabel: "tylna" },
+            { minLabel: "tylna", midLabel: "środkowa", maxLabel: "przednia" },
             getProfileScaleBounds(finiteFb, state.profileScaleMode.frontBack),
             profile
           )
@@ -2659,7 +2659,7 @@
             }]
           },
           options: clauseChartOptions(
-            { minLabel: "przednia", midLabel: "środkowa", maxLabel: "tylna" },
+            { minLabel: "tylna", midLabel: "środkowa", maxLabel: "przednia" },
             fbBounds,
             profile
           )
@@ -2717,7 +2717,7 @@
             }]
           },
           options: onsetChartOptions(
-            { minLabel: "przednia", midLabel: "środkowa", maxLabel: "tylna" },
+            { minLabel: "tylna", midLabel: "środkowa", maxLabel: "przednia" },
             fbBounds,
             profile
           )
